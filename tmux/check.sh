@@ -58,7 +58,8 @@ try:
     tm("send-keys", "-K", "-c", target, "t")
     time.sleep(0.2)
     assert tm("capture-pane", "-p", "-t", pane) == "t", "normal typing lost t"
-    assert "tmux-tasklog open" in tm("list-keys", "-T", "prefix", "t")
+    binding = next(line for line in tm("list-keys", "-T", "prefix").splitlines() if line.split()[3] == "t")
+    assert "tmux-tasklog open" in binding
     print("ok: sidebar t blocked; normal t and Prefix+t preserved")
 finally:
     client.terminate()
