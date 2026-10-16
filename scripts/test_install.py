@@ -48,6 +48,7 @@ class RestoreTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(nvim.resolve(), ROOT / "nvim")
             self.assertEqual((home / ".config/wezterm").resolve(), ROOT / "wezterm")
+            self.assertEqual((home / ".config/foot").resolve(), ROOT / "foot")
             self.assertEqual((home / ".zshrc").resolve(), ROOT / "shell/.zshrc")
             self.assertEqual((home / ".tmux.conf").resolve(), home / ".tmux-omt/.tmux.conf")
             self.assertEqual((home / ".tmux.conf.local").resolve(), ROOT / "tmux/.tmux.conf.local")

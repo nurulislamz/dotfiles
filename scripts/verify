@@ -32,6 +32,12 @@ else
   echo "warn: missing wezterm"
 fi
 
+if command -v foot >/dev/null 2>&1; then
+  echo "ok: foot"
+else
+  echo "warn: missing foot"
+fi
+
 if [ -x "$HOME/.local/libexec/workmux" ]; then
   echo "ok: native workmux"
 else

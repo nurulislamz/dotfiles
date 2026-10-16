@@ -1,6 +1,6 @@
 # Personal dotfiles
 
-`vsvimsettings` is the source of truth for Neovim, WezTerm, zsh, tmux
+`vsvimsettings` is the source of truth for Neovim, Foot, WezTerm, zsh, tmux
 customizations, shared agent instructions, the workmux skill, lifecycle hooks
 and box launchers. Installed paths point here; edit and commit files in this
 repo.
@@ -22,7 +22,7 @@ Packages already present? Links only:
 python3 ~/vsvimsettings/scripts/install.py
 ```
 
-The installer links Neovim, WezTerm, `.zshrc`, tmux's local config, oh-my-tmux
+The installer links Neovim, Foot, WezTerm, `.zshrc`, tmux's local config, oh-my-tmux
 (`~/.tmux-omt` cloned if missing), workmux config, shared rules, skills and
 helper commands. It merges tracked lifecycle hooks into Codex, Claude and
 Antigravity, retaining custom hooks and other settings. Re-run it after changing

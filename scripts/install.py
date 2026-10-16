@@ -87,6 +87,7 @@ def install():
     paths = {
         ".config/nvim": "nvim",
         ".config/wezterm": "wezterm",
+        ".config/foot": "foot",
         ".zshrc": "shell/.zshrc",
         ".tmux.conf.local": "tmux/.tmux.conf.local",
         ".config/agents/AGENTS.md": "agents/AGENTS.md",
