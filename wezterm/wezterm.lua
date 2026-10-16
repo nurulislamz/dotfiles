@@ -130,7 +130,8 @@ elseif host_os == "linux" then
     config.max_fps = 60
     config.animation_fps = 30
     config.default_prog = { "zsh" }
-    config.front_end = "WebGpu"
+    -- OpenGL used less CPU than WebGPU in matched HD 620 rendering tests.
+    config.front_end = "OpenGL"
     config.window_background_image = os.getenv("HOME") .. "/.config/wezterm/bg-blurred.png"
     config.window_decorations = nil -- use system decorations
 else
