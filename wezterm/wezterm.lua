@@ -126,6 +126,9 @@ if host_os == "windows" then
     }
     config.default_domain = "WSL:Ubuntu"
 elseif host_os == "linux" then
+    -- Match this laptop's 60 Hz panel and avoid unnecessary animation work.
+    config.max_fps = 60
+    config.animation_fps = 30
     config.default_prog = { "zsh" }
     config.front_end = "WebGpu"
     config.window_background_image = os.getenv("HOME") .. "/.config/wezterm/bg-blurred.png"
