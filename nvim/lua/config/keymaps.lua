@@ -17,6 +17,8 @@ map("n", "#", "#<cmd>lua require('hlslens').start()<cr>", { desc = "Search word 
 map("n", "g*", "g*<cmd>lua require('hlslens').start()<cr>", { desc = "Search word forward (partial)" })
 map("n", "g#", "g#<cmd>lua require('hlslens').start()<cr>", { desc = "Search word backward (partial)" })
 map("n", "U", "<C-r>", { desc = "Redo" })
+map("x", "<Tab>", ">gv", { desc = "Indent selection" })
+map("x", "<S-Tab>", "<gv", { desc = "Unindent selection" })
 
 local function copy_context()
     local path = vim.fn.expand("%:.")
