@@ -138,4 +138,45 @@ else
     config.default_prog = { "zsh" }
 end
 
+-- Quick Select Patterns
+config.quick_select_patterns = {
+    -- UUIDs
+    "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+    -- Alphanumeric tokens / hashes / container IDs (min 8 chars)
+    "[a-zA-Z0-9_-]{8,}",
+    -- IP with optional port
+    "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?::\\d+)?\\b",
+    -- Hex colors
+    "#[0-9a-fA-F]{6}\\b",
+    -- Env vars
+    "\\$[A-Z_][A-Z0-9_]*",
+    -- Quoted strings
+    '"[^"]+"',
+    "'[^']+'",
+}
+
+-- Plugins (leader required by replay + cmdpicker)
+config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
+
+local resurrect = wezterm.plugin.require("https://github.com/StephenGemin/resurrect.wezterm")
+resurrect.setup(config, { status_bar = false })
+
+local modal = wezterm.plugin.require("https://github.com/MLFlexer/modal.wezterm")
+modal.apply_to_config(config)
+modal.set_default_keys(config)
+wezterm.on("modal.enter", function(name, window, pane)
+    modal.set_right_status(window, name)
+    modal.set_window_title(pane, name)
+end)
+wezterm.on("modal.exit", function(_, window, pane)
+    window:set_right_status("")
+    modal.reset_window_title(pane)
+end)
+
+local wezterm_replay = wezterm.plugin.require("https://github.com/btrachey/wezterm-replay")
+wezterm_replay.apply_to_config(config)
+
+local cmdpicker = wezterm.plugin.require("https://github.com/abidibo/wezterm-cmdpicker")
+cmdpicker.apply_to_config(config, { title = "Command Palette" })
+
 return config

@@ -100,11 +100,6 @@ return {
     end
   },
   {
-    "diegok/live-autoread.nvim",
-    event = "BufReadPost",
-    opts = {},
-  },
-  {
     "akinsho/bufferline.nvim",
     event = { "BufReadPost", "BufNewFile" },
     keys = {

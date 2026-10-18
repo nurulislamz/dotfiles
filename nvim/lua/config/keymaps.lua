@@ -90,6 +90,11 @@ do
     map("n", "<leader><tab><tab>", ":tabnew<cr>", { desc = "New Tab" })
     map("n", "<leader><tab>l", ":tabnext<cr>", { desc = "Next Tab" })
     map("n", "<leader><tab>h", ":tabprevious<cr>", { desc = "Previous Tab" })
+    map("n", "<leader><tab>q", function()
+        if vim.fn.tabpagenr("$") > 1 then
+            pcall(vim.cmd, "tabclose")
+        end
+    end, { desc = "Close Tab" })
     map("n", "<leader><tab>o", function()
         if vim.fn.tabpagenr("$") > 1 then
             pcall(vim.cmd, "tabonly")
@@ -307,8 +312,13 @@ do
     -- Snacks Pickers
     map("n", "<leader>ff", function() require("fff").find_files() end, { desc = "Find files (FFF)" })
     map("n", "<leader>fr", function() snacks.picker.recent() end, { desc = "Fuzzy find recent files" })
-    map("n", "<leader>fs", function() snacks.picker.grep() end, { desc = "Find string in CWD" })
-    map("n", "<leader>fc", function() snacks.picker.grep_word() end, { desc = "Find word under cursor" })
+    map({ "n", "x" }, "<leader>fs", function() require("grug-far").open({ transient = true }) end, { desc = "Search string in CWD (GrugFar)" })
+    map("n", "<leader>fc", function()
+        require("grug-far").open({
+            transient = true,
+            prefills = { search = vim.fn.expand("<cword>") },
+        })
+    end, { desc = "Search word under cursor (GrugFar)" })
 
     -- Snacks Ergonomics & Tools
     map("n", "<leader>z", function() snacks.zen() end, { desc = "Zen mode" })
@@ -427,64 +437,13 @@ do
     map("n", "K", vim.lsp.buf.hover, { desc = "Hover Documentation" })
     map("n", "<leader>rn", rename_symbol, { expr = true, desc = "Rename Symbol" })
     map({ "n", "x" }, "ga", function() require("tiny-code-action").code_action() end, { desc = "Code Action" })
+    map({ "n", "x" }, "<leader>ca", function() require("tiny-code-action").code_action() end, { desc = "Code Action" })
     map({ "n", "x", "i" }, "<C-.>", function() require("tiny-code-action").code_action() end, { desc = "Code Action" })
     map("n", "gl", vim.diagnostic.open_float, { desc = "Show Line Diagnostics" })
     map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
     map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 
-    -- Hidden buffers can be LSP dependencies; refresh them while idle too.
-    local function setup_disk_reload()
-        local function check_buffer_time(buf)
-            if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" then
-                vim.cmd("checktime " .. buf)
-            end
-        end
-
-        vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
-            callback = function(event)
-                if vim.fn.mode() == "c" then return end
-                vim.schedule(function()
-                    if event.event == "BufEnter" then
-                        check_buffer_time(event.buf)
-                        return
-                    end
-                    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                        check_buffer_time(buf)
-                    end
-                end)
-            end,
-        })
-
-        -- Watchers only reload the current tab; poll clean buffers for missed changes.
-        if vim.g.disk_reload_timer then vim.fn.timer_stop(vim.g.disk_reload_timer) end
-        vim.g.disk_reload_timer = vim.fn.timer_start(1000, function()
-            if vim.fn.mode() == "c" or vim.fn.getcmdwintype() ~= "" then return end
-            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                if vim.api.nvim_buf_is_loaded(buf) and not vim.bo[buf].modified then
-                    check_buffer_time(buf)
-                end
-            end
-        end, { ["repeat"] = -1 })
-
-        -- Coalesce Pyrefly refreshes when several external edits reload together.
-        local reload_seq = 0
-        vim.api.nvim_create_autocmd("FileChangedShellPost", {
-            callback = function(event)
-                if vim.bo[event.buf].filetype ~= "python" then return end
-                reload_seq = reload_seq + 1
-                local seq = reload_seq
-                vim.defer_fn(function()
-                    if seq ~= reload_seq then return end
-                    for _, client in ipairs(vim.lsp.get_clients()) do
-                        if client.name == "pyrefly" then
-                            client:notify("workspace/didChangeConfiguration", { settings = client.config.settings })
-                        end
-                    end
-                end, 150)
-            end,
-        })
-    end
-    setup_disk_reload()
+    require("disk_reload").setup()
     map("n", "<leader>lr", "<cmd>LspRestart<CR>", { desc = "Restart LSP server" })
 
 

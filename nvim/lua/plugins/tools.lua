@@ -1,5 +1,23 @@
 return {
-  { "tpope/vim-fugitive" },
+  {
+    "tpope/vim-fugitive",
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "fugitive",
+        callback = function()
+          vim.cmd([[
+            nmap <buffer> <Plug>(fugitive-stage) s
+            nmap <buffer> S <Plug>(fugitive-stage)
+            nunmap <buffer> s
+
+            xmap <buffer> <Plug>(fugitive-stage) s
+            xmap <buffer> S <Plug>(fugitive-stage)
+            xunmap <buffer> s
+          ]])
+        end,
+      })
+    end,
+  },
   {
     "esmuellert/codediff.nvim",
     cmd = "CodeDiff",

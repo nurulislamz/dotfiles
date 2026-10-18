@@ -5,7 +5,17 @@ return {
     config = function()
       require("mini.ai").setup()
       require("mini.pairs").setup()
-      require("mini.surround").setup({ mappings = { add = "sr", replace = "sa" } })
+      require("mini.surround").setup({
+        mappings = {
+          add = "Sr",
+          replace = "Sa",
+          delete = "Sd",
+          find = "Sf",
+          find_left = "SF",
+          highlight = "Sh",
+          update_n_lines = "Sn",
+        },
+      })
       require("mini.jump").setup()
       require("mini.icons").setup()
       require("mini.icons").mock_nvim_web_devicons()
@@ -181,9 +191,10 @@ return {
   { "mbbill/undotree", lazy = false },
   {
     "okuuva/auto-save.nvim",
-    event = { "InsertLeave", "TextChanged" },
+    event = { "BufReadPost", "BufNewFile" },
     opts = {
       debounce_delay = 1000,
+      write_all_buffers = true,
       condition = function(buf)
         local fn = vim.fn
         local exclude_ft = { "gitcommit", "gitrebase" }
@@ -238,5 +249,18 @@ return {
       { "<leader>lg", function() require("chainsaw").variableLog() end, desc = "Log variable" },
     },
     opts = {},
+  },
+  {
+    "MagicDuck/grug-far.nvim",
+    cmd = { "GrugFar", "GrugFarWithin" },
+    opts = { headerMaxWidth = 80 },
+  },
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+    },
   },
 }

@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""Run native workmux dashboard with Esc-to-quit support (prefix+a)."""
+
+from __future__ import annotations
+
+import fcntl
+import os
+import pathlib
+import pty
+import select
+import signal
+import subprocess
+import sys
+import termios
+from typing import Any
+import tty
+
+NATIVE = str(pathlib.Path.home() / ".local/libexec/workmux")
+
+
+def is_generic_title(t: str, hostname: str) -> bool:
+    clean = t.strip().lower()
+    if not clean or clean == hostname or clean == "desktop":
+        return True
+    if clean in ("bash", "zsh", "sh", "fish", "nvim", "workmux"):
+        return True
+    if clean.startswith("agy") or clean.startswith("claude"):
+        return True
+    if "@" in clean and ":" in clean:
+        return True
+    return False
+
+
+def is_generic_window(w: str) -> bool:
+    clean = w.strip().lower()
+    if not clean or clean in ("bash", "zsh", "sh", "fish", "nvim", "workmux"):
+        return True
+    if " | " in clean:
+        _, right = clean.split(" | ", 1)
+        if right in ("bash", "zsh", "sh", "fish", "nvim", "workmux", "agy"):
+            return True
+    return False
+
+
+def tag_pane_titles_with_session() -> None:
+    try:
+        import socket
+
+        hostname = socket.gethostname().lower()
+        out = subprocess.check_output(
+            [
+                "tmux",
+                "list-panes",
+                "-a",
+                "-F",
+                "#{pane_id}\t#{session_name}\t#{window_name}\t#{pane_title}\t#{pane_current_command}",
+            ],
+            text=True,
+            timeout=2,
+        )
+        for line in out.splitlines():
+            parts = line.split("\t")
+            if len(parts) >= 5:
+                pane_id, session, win, title, cmd = parts[:5]
+                session_clean = session.strip().lstrip('"')
+                if not session_clean:
+                    continue
+
+                t = title.strip()
+                if t.startswith(f"[{session_clean}]"):
+                    t = t[len(session_clean) + 2 :].strip()
+                elif t.startswith("[") and "] " in t:
+                    t = t.split("] ", 1)[1].strip()
+
+                if not is_generic_title(t, hostname):
+                    chosen = t
+                elif not is_generic_window(win):
+                    chosen = win.strip()
+                else:
+                    chosen = t if t and t.lower() not in (hostname, "desktop") else cmd
+
+                if " | " in chosen:
+                    chosen = chosen.split(" | ")[0].strip()
+
+                new_title = chosen
+                if new_title != title:
+                    subprocess.run(
+                        ["tmux", "select-pane", "-t", pane_id, "-T", new_title],
+                        check=False,
+                        timeout=1,
+                    )
+    except Exception:
+        pass
+
+
+def set_winsize(src: int, dst: int) -> None:
+    try:
+        ws = fcntl.ioctl(src, termios.TIOCGWINSZ, b"\x00" * 8)
+        fcntl.ioctl(dst, termios.TIOCSWINSZ, ws)
+    except OSError:
+        pass
+
+
+def run_passthrough() -> None:
+    os.execv(NATIVE, ["workmux", "dashboard", *sys.argv[1:]])
+
+
+def main() -> int:
+    if "--help" in sys.argv or "-h" in sys.argv:
+        run_passthrough()
+
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        run_passthrough()
+
+    tag_pane_titles_with_session()
+
+    pid, master = pty.fork()
+    if pid == 0:
+        run_passthrough()
+
+    old_attr = termios.tcgetattr(sys.stdin.fileno())
+    set_winsize(sys.stdin.fileno(), master)
+
+    def handle_sigwinch(_signum: int, _frame: Any) -> None:
+        set_winsize(sys.stdin.fileno(), master)
+
+    signal.signal(signal.SIGWINCH, handle_sigwinch)
+
+    in_text_mode = False
+
+    try:
+        tty.setraw(sys.stdin.fileno())
+        while True:
+            r, _, _ = select.select([0, master], [], [])
+            if master in r:
+                try:
+                    data = os.read(master, 4096)
+                except OSError:
+                    break
+                if not data:
+                    break
+                os.write(1, data)
+
+            if 0 in r:
+                try:
+                    data = os.read(0, 1024)
+                except OSError:
+                    break
+                if not data:
+                    break
+
+                if data == b"\x1b":
+                    # Standalone Esc vs escape sequence (arrow / mouse)
+                    r_esc, _, _ = select.select([0], [], [], 0.025)
+                    if r_esc:
+                        more = os.read(0, 1024)
+                        os.write(master, b"\x1b" + more)
+                    else:
+                        if in_text_mode:
+                            in_text_mode = False
+                            os.write(master, b"\x1b")
+                        else:
+                            os.write(master, b"q")
+                else:
+                    if len(data) == 1:
+                        if data in (b"/", b"i"):
+                            in_text_mode = True
+                        elif data in (b"\r", b"\n"):
+                            in_text_mode = False
+                    os.write(master, data)
+    finally:
+        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_attr)
+
+    try:
+        _, status = os.waitpid(pid, 0)
+        return os.waitstatus_to_exitcode(status)
+    except OSError:
+        return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

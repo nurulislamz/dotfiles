@@ -103,6 +103,7 @@ def install():
         ".cursor/rules/session-tasks.md", ".gemini/config/rules/session-tasks.md",
     ):
         paths[target] = "agents/AGENTS.md"
+    paths[".cursor/rules/fastapi-string-ids.mdc"] = "cursor/rules/fastapi-string-ids.mdc"
     for directory in (
         ".agents/skills", ".codex/skills", ".claude/skills", ".cursor/skills",
         ".config/opencode/skills", ".gemini/config/skills",

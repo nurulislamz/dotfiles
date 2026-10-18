@@ -55,6 +55,18 @@ or model is selected by the installer.
 The installer also links Zed's `settings.json`, `keymap.json` and `tasks.json`.
 Ghostty and IdeaVim stay stored; the installer does not apply them.
 
+## Agent setup (Linux/WSL)
+
+Install `curl`, `git`, `python3`, `tmux` and distro `bubblewrap`, then:
+
+```sh
+bash ~/vsvimsettings/scripts/setup-agents.sh
+```
+
+Installs missing AGY/Codex/OMP/Cursor CLIs, restores dotfiles, and recreates the
+saved box names. Existing accounts remain; sign in separately on new machines.
+See [agent inventory and setup details](dotfiles.md#agent-tools-and-saved-box-inventory).
+
 ## Neovim
 
 All configuration lives under `nvim/`, including `lazy-lock.json` and Tree-sitter

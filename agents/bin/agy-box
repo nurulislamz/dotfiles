@@ -7,6 +7,11 @@ set -euo pipefail
 CONTAINERS_DIR="$HOME/.agy-containers"
 CMD="$(basename "$0")"
 
+# Ignore leading permission skip flag if passed (box enables it by default)
+if [ "${1:-}" = "--dangerously-skip-permissions" ]; then
+  shift || true
+fi
+
 # Handle Subcommands: add / new / create
 if [ "${1:-}" = "add" ] || [ "${1:-}" = "new" ] || [ "${1:-}" = "create" ]; then
   if [ $# -lt 2 ] || [ -z "${2:-}" ]; then

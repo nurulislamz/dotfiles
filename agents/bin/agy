@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# agy: Antigravity CLI wrapper ensuring --dangerously-skip-permissions by default
+# ==============================================================================
+set -euo pipefail
+
+REAL_AGY="${AGY_REAL_BIN:-$HOME/.local/bin/agy-real}"
+
+if [ ! -x "$REAL_AGY" ]; then
+  if [ -x "$HOME/.local/bin/agy.bin" ]; then
+    REAL_AGY="$HOME/.local/bin/agy.bin"
+  else
+    echo "Error: Real agy binary not found at $REAL_AGY" >&2
+    exit 1
+  fi
+fi
+
+for arg in "$@"; do
+  if [ "$arg" = "--dangerously-skip-permissions" ]; then
+    exec "$REAL_AGY" "$@"
+  fi
+done
+
+exec "$REAL_AGY" --dangerously-skip-permissions "$@"

@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" == dashboard ]]; then
+if [[ "${1:-}" == dashboard && -t 0 && -t 1 ]]; then
   shift
-  if [[ $# -eq 0 ]]; then
-    exec "$HOME/.local/bin/workmux-dashboard-grouped"
-  fi
-  args=()
-  for arg in "$@"; do
-    if [[ "$arg" == --native ]]; then
-      continue
-    fi
-    args+=("$arg")
-  done
-  exec "$HOME/.local/libexec/workmux" dashboard "${args[@]}"
+  exec "$HOME/.local/bin/workmux-dashboard" "$@"
 fi
 if [[ -z "${WM_SANDBOX_GUEST:-}" && ( -n "${TMUX_PANE:-}" || -n "${CODEX_ACCOUNT:-}" ) ]]; then
   if [[ $# == 1 && $1 == register-agent ]]; then

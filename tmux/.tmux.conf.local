@@ -534,7 +534,9 @@ set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @plugin 'timvw/tmux-assistant-resurrect'
 
 # resurrect restores nvim as a process; persistence.nvim autoloads on VimEnter.
-# Do not set @resurrect-strategy-nvim session (that is vim-obsession / Session.vim).
+# Drop saved file args (`nvim main.py`) so argc is 0 and persistence can load
+# the last buffers. Do not set @resurrect-strategy-nvim session (Session.vim).
+set -g @resurrect-processes 'nvim->nvim'
 set -g @continuum-restore 'on'
 set -g @continuum-save-interval '15'
 

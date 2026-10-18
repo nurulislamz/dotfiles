@@ -6,6 +6,9 @@ mode: session
 status_format: false
 nerdfont: true
 
+dashboard:
+  agent_columns: [number, session, project, worktree, git, pr, status, time, title]
+
 # Init <worktree>/.workmux/task.md before the agent pane exists.
 post_create:
   - tmux-tasklog init
@@ -17,5 +20,9 @@ sidebar:
   group_by: session
   templates:
     compact: "{status_icon} #[bold]{window_index}#[default] #[fg=cyan]│#[default] {pane_title}"
+    tiles:
+      - "{primary} {pane_suffix} {fill} {elapsed}"
+      - "{secondary} {fill} {git_stats}"
+      - "{pane_title} {fill} {pr_checks}"
     grouped:
       header: "{group} {fill} {group_count}"
