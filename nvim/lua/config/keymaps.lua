@@ -443,59 +443,7 @@ do
     map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
     map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 
-    -- Hidden buffers can be LSP dependencies; refresh them while idle too.
-    local function setup_disk_reload()
-        local function check_buffer_time(buf)
-            if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" then
-                vim.cmd("checktime " .. buf)
-            end
-        end
-
-        vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
-            callback = function(event)
-                if vim.fn.mode() == "c" then return end
-                vim.schedule(function()
-                    if event.event == "BufEnter" then
-                        check_buffer_time(event.buf)
-                        return
-                    end
-                    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                        check_buffer_time(buf)
-                    end
-                end)
-            end,
-        })
-
-        -- Watchers only reload the current tab; poll clean buffers for missed changes.
-        if vim.g.disk_reload_timer then vim.fn.timer_stop(vim.g.disk_reload_timer) end
-        vim.g.disk_reload_timer = vim.fn.timer_start(1000, function()
-            if vim.fn.mode() == "c" or vim.fn.getcmdwintype() ~= "" then return end
-            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                if vim.api.nvim_buf_is_loaded(buf) and not vim.bo[buf].modified then
-                    check_buffer_time(buf)
-                end
-            end
-        end, { ["repeat"] = -1 })
-
-        -- Coalesce Pyrefly refreshes when several external edits reload together.
-        local reload_seq = 0
-        vim.api.nvim_create_autocmd("FileChangedShellPost", {
-            callback = function(event)
-                if vim.bo[event.buf].filetype ~= "python" then return end
-                reload_seq = reload_seq + 1
-                local seq = reload_seq
-                vim.defer_fn(function()
-                    if seq ~= reload_seq then return end
-                    for _, client in ipairs(vim.lsp.get_clients()) do
-                        if client.name == "pyrefly" then
-                            client:notify("workspace/didChangeConfiguration", { settings = client.config.settings })
-                        end
-                    end
-                end, 150)
-            end,
-        })
-    end
-    setup_disk_reload()
+    require("disk_reload").setup()
     map("n", "<leader>lr", "<cmd>LspRestart<CR>", { desc = "Restart LSP server" })
 
 

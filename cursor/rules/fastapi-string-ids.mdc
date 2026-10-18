@@ -1,0 +1,32 @@
+---
+description: FastAPI entity IDs are strings, never uuid.UUID. MySQL has no UUID type.
+alwaysApply: true
+---
+
+# Entity IDs are strings
+
+MySQL has no UUID column type. Application IDs are CHAR/VARCHAR strings end-to-end.
+
+```python
+# ❌ BAD
+@router.get("/files/{file_id}")
+async def get_file(file_id: uuid.UUID) -> FileResponse: ...
+
+class FileResponse(Schema):
+    file_id: uuid.UUID
+```
+
+```python
+# ✅ GOOD
+@router.get("/files/{file_id}")
+async def get_file(file_id: str) -> FileResponse: ...
+
+class FileResponse(Schema):
+    file_id: str
+```
+
+- Path, query, body, dependency, service, and repository IDs: `str`, not `uuid.UUID`.
+- Do not add a `{file_id:uuid}` converter.
+- Persist and compare `row.id` as stored. Do not wrap with `uuid.UUID(row.id)`.
+- Generate IDs with `str(uuid.uuid7())`.
+- Provider subjects stay their protocol type. Never treat them as application IDs.
