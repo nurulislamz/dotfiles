@@ -21,6 +21,7 @@ import sys
 home, root = Path(sys.argv[1]), Path(sys.argv[2])
 assert (home / ".config/nvim").resolve() == root / "nvim"
 assert (home / ".config/wezterm").resolve() == root / "wezterm"
+assert (home / ".config/foot").resolve() == root / "foot"
 assert (home / ".zshrc").resolve() == root / "shell/.zshrc"
 assert (home / ".tmux.conf.local").resolve() == root / "tmux/.tmux.conf.local"
 assert (home / ".tmux.conf").resolve() == (home / ".tmux-omt/.tmux.conf")

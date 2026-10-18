@@ -154,3 +154,11 @@ tmux() {
   fi
   command tmux attach || command tmux new-session
 }
+
+# Autosuggestions (Fish-like real-time autocomplete suggestions)
+if [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+  bindkey -M viins '^ ' autosuggest-accept
+  bindkey -M viins '^@' autosuggest-accept
+  bindkey -M viins '^F' autosuggest-accept
+fi
