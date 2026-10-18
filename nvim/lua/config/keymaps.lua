@@ -5,6 +5,9 @@ local function rename_symbol()
 end
 
 -- Clear search highlights with Esc or <leader>nh
+-- Translate terminal CSI u Shift+Enter (\x1b[13;2u) to <S-CR>
+map({ "n", "i", "c", "t", "v" }, "<Esc>[13;2u", "<S-CR>", { remap = true, desc = "Shift-Enter CSI u remap" })
+
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 map("n", "<leader>nh", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 map("n", "n", "nzzzv<cmd>lua require('hlslens').start()<cr>", { desc = "Next search result centered" })
@@ -406,6 +409,11 @@ do
 
                 vim.keymap.set("n", "<CR>", function() qf_jump(true) end,
                     { buffer = event.buf, desc = "Preview reference (stay in submenu)" })
+                vim.keymap.set("n", "<S-CR>", function()
+                    local lnum = vim.api.nvim_win_get_cursor(0)[1]
+                    vim.cmd("tab split")
+                    pcall(vim.cmd, lnum .. "cc")
+                end, { buffer = event.buf, desc = "Open reference in new tab" })
                 vim.keymap.set("n", "<2-LeftMouse>", function() qf_jump(true) end,
                     { buffer = event.buf, desc = "Preview reference (stay in submenu)" })
                 vim.keymap.set("n", "o", function()

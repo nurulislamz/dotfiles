@@ -20,6 +20,9 @@ return {
       vim.keymap.set("n", "<C-e>", function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
         if harpoon.ui.bufnr then
+          vim.keymap.set("n", "<S-CR>", function()
+            harpoon.ui:select_menu_item({ tabedit = true })
+          end, { buffer = harpoon.ui.bufnr, silent = true, desc = "Harpoon open in new tab" })
           -- harpoon closes the menu on any BufLeave; drop it so only an explicit close ends the menu
           vim.api.nvim_clear_autocmds({
             group = require("harpoon.autocmd"),

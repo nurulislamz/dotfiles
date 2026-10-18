@@ -34,6 +34,7 @@ return {
         mappings = {
           list = {
             ["<leader>q"] = actions.close,
+            ["<S-CR>"] = actions.jump_tab,
           },
           preview = {
             ["<leader>q"] = actions.close,

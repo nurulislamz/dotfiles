@@ -62,6 +62,22 @@ local function run()
     check("gr", has_map("n", "gr"))
     check("<C-h>", has_map("n", "<C-h>"))
     check("<leader>x", has_map("n", "<leader>x"))
+    check("shift-enter csi-u mapping", has_map("n", "<Esc>[13;2u"))
+
+    local fff_conf = require("fff.conf").get()
+    local tab_keys = fff_conf and fff_conf.keymaps and fff_conf.keymaps.select_tab
+    local fff_has_s_cr = false
+    if type(tab_keys) == "table" then
+        for _, k in ipairs(tab_keys) do
+            if k == "<S-CR>" then fff_has_s_cr = true end
+        end
+    elseif tab_keys == "<S-CR>" then
+        fff_has_s_cr = true
+    end
+    check("fff select_tab has <S-CR>", fff_has_s_cr)
+
+    local oil_keys = require("oil.config").keymaps["<S-CR>"]
+    check("oil <S-CR> tab", oil_keys ~= nil and oil_keys.opts ~= nil and oil_keys.opts.tab == true)
 
     local fzf_root = vim.fn.stdpath("data") .. "/lazy/telescope-fzf-native.nvim/build/"
     check(

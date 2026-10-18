@@ -25,7 +25,12 @@ return {
     "dmtrKovalenko/fff.nvim",
     lazy = false,
     build = function() require("fff.download").download_or_build_binary() end,
-    opts = { lazy_sync = true },
+    opts = {
+      lazy_sync = true,
+      keymaps = {
+        select_tab = { "<C-t>", "<S-CR>" },
+      },
+    },
   },
   { 
     "nvim-telescope/telescope.nvim", 

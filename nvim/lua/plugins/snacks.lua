@@ -73,6 +73,7 @@ return {
           win = {
             list = {
               keys = {
+                ["<S-CR>"] = { "tab", mode = { "n", "i" } },
                 ["<c-p>"] = { "toggle_preview", mode = { "n", "i" } },
               },
             },
