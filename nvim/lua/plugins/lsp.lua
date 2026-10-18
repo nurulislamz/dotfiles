@@ -45,7 +45,7 @@ return {
                         return blink.select_and_accept()
                     end,
                     "snippet_forward",
-                    function() return "<Plug>(Tabout)" end,
+                    function() return vim.api.nvim_replace_termcodes("<Plug>(Tabout)", true, true, true) end,
                     "fallback",
                 },
                 ["<CR>"] = { "select_and_accept", "fallback" },
