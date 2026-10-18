@@ -47,7 +47,7 @@ config.win32_system_backdrop = "Acrylic"
 -- Performance Settings
 config.max_fps = 144
 config.animation_fps = 60
-config.cursor_blink_rate = 0
+config.cursor_blink_rate = 250
 
 -- Tab Bar Configuration
 config.enable_tab_bar = true
@@ -126,14 +126,9 @@ if host_os == "windows" then
     }
     config.default_domain = "WSL:Ubuntu"
 elseif host_os == "linux" then
-    -- Match this laptop's 60 Hz panel and avoid unnecessary animation work.
-    config.max_fps = 60
-    config.animation_fps = 1
     config.default_prog = { "zsh" }
-    -- Use WebGPU (Vulkan) for smooth asynchronous presentation on Wayland
     config.front_end = "WebGpu"
-    -- Skip the blurred wallpaper; it is an extra full-window texture on HD 620.
-    config.window_background_image = nil
+    config.window_background_image = os.getenv("HOME") .. "/.config/wezterm/bg-blurred.png"
     config.window_decorations = nil -- use system decorations
 else
     config.default_prog = { "zsh" }
