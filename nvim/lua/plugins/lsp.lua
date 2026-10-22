@@ -44,8 +44,6 @@ return {
                         end
                         return blink.select_and_accept()
                     end,
-                    "snippet_forward",
-                    function() return "<Plug>(Tabout)" end,
                     "fallback",
                 },
                 ["<CR>"] = { "select_and_accept", "fallback" },
