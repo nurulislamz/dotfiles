@@ -61,32 +61,45 @@ return {
               pcall(vim.api.nvim_buf_delete, b, { force = true })
             end
           end
-          -- Scratch buffers (codediff panes, plugin scratch) must not stay focused
-          local cur = vim.api.nvim_get_current_buf()
-          local name = vim.api.nvim_buf_get_name(cur)
-          local scratch = vim.bo[cur].buftype ~= ""
-            or name == ""
-            or name:find("^%a[%w+.-]*://")
-            or vim.fn.filereadable(name) == 0
-          if scratch and not vim.bo[cur].modified then
-            local target, best_used
-            for _, b in ipairs(vim.api.nvim_list_bufs()) do
-              local n = vim.api.nvim_buf_get_name(b)
-              if
-                #vim.fn.win_findbuf(b) > 0
-                and vim.bo[b].buftype == ""
-                and n ~= ""
-                and not n:find("^%a[%w+.-]*://")
-                and vim.fn.filereadable(n) == 1
-              then
-                local used = (vim.fn.getbufinfo(b)[1] or {}).lastused or 0
-                if not target or used > best_used or (used == best_used and b > target) then
-                  target, best_used = b, used
+          -- Land on the file you had open last. Session focus can be a plugin
+          -- scratch buffer, and a stale session file must not win over your
+          -- most recently opened file (ShaDa v:oldfiles).
+          local function real_file(b)
+            local n = vim.api.nvim_buf_get_name(b)
+            if
+              vim.bo[b].buftype == ""
+              and n ~= ""
+              and not n:find("^%a[%w+.-]*://")
+              and vim.fn.filereadable(n) == 1
+            then
+              return n
+            end
+          end
+          local target, rank
+          for _, b in ipairs(vim.api.nvim_list_bufs()) do
+            local n = real_file(b)
+            if n then
+              for i, f in ipairs(vim.v.oldfiles) do
+                if f == n and (not rank or i < rank) then
+                  target, rank = b, i
+                  break
                 end
               end
             end
-            if target then
-              pcall(vim.api.nvim_set_current_win, vim.fn.win_findbuf(target)[1])
+          end
+          if target and target ~= vim.api.nvim_get_current_buf() and not vim.bo.modified then
+            local win = vim.fn.win_findbuf(target)[1]
+            if not win then
+              for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                if vim.api.nvim_win_get_config(w).relative == "" then
+                  win = w
+                  break
+                end
+              end
+            end
+            if win then
+              pcall(vim.api.nvim_win_set_buf, win, target)
+              pcall(vim.api.nvim_set_current_win, win)
             end
           end
         end,
