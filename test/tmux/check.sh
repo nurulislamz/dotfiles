@@ -27,6 +27,9 @@ check "mode-keys"           vi "$(tmux -L $SOCK show -gwv mode-keys)"
 check "escape-time"          0 "$(tmux -L $SOCK show -sv escape-time)"
 check "history-limit"    10000 "$(tmux -L $SOCK show -gv history-limit)"
 check "continuum-restore" on "$(tmux -L $SOCK show -gv @continuum-restore)"
+for assistant in claude cursor opencode; do
+  check "$assistant agent hooks disabled" off "$(tmux -L $SOCK show -gv @assistant-resurrect-$assistant)"
+done
 check "smooth-scroll-speed" 30 "$(tmux -L $SOCK show -gv @smooth-scroll-speed)"
 check "smooth-scroll-mouse" true "$(tmux -L $SOCK show -gv @smooth-scroll-mouse)"
 check "C-u not important" 0 "$(grep -c 'copy-mode-vi C-u.*#!important' "$HOME/.tmux.conf.local" || true)"

@@ -4,14 +4,4 @@ if [[ "${1:-}" == dashboard && -t 0 && -t 1 ]]; then
   shift
   exec "$HOME/.local/bin/workmux-dashboard" "$@"
 fi
-if [[ -z "${WM_SANDBOX_GUEST:-}" && ( -n "${TMUX_PANE:-}" || -n "${CODEX_ACCOUNT:-}" ) ]]; then
-  if [[ $# == 1 && $1 == register-agent ]]; then
-    exec "$HOME/.local/bin/workmux-agent-hook" "$@"
-  fi
-  if [[ $# == 2 && $1 == set-window-status ]]; then
-    case "$2" in
-      working|waiting|done|clear) exec "$HOME/.local/bin/workmux-agent-hook" "$@" ;;
-    esac
-  fi
-fi
 exec "$HOME/.local/libexec/workmux" "$@"

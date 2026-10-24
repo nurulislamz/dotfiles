@@ -559,6 +559,9 @@ set -g @plugin 'alexwforsythe/tmux-which-key'
 set -g @plugin 'azorng/tmux-smooth-scroll'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @plugin 'timvw/tmux-assistant-resurrect'
+set -g @assistant-resurrect-claude 'off'
+set -g @assistant-resurrect-cursor 'off'
+set -g @assistant-resurrect-opencode 'off'
 
 # resurrect restores nvim as a process; persistence.nvim autoloads on VimEnter.
 # Drop saved file args (`nvim main.py`) so argc is 0 and persistence can load

@@ -163,10 +163,6 @@ if [ ! -x "$AGENT_BIN" ]; then
   exit 1
 fi
 
-if [ -n "${TMUX_PANE:-}" ] && [ -z "${WORKMUX_DISABLE_SET_WINDOW_STATUS:-}" ]; then
-  workmux register-agent >/dev/null 2>&1 || true
-fi
-
 exec "$BWRAP_BIN" \
   --ro-bind / / \
   --dev /dev \

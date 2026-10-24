@@ -154,12 +154,6 @@ if [ -f "$HOME/.config/agents/AGENTS.md" ]; then
 elif [ -f "$HOME/.codex/AGENTS.md" ]; then
   cp -u "$HOME/.codex/AGENTS.md" "$PROFILE_DIR/.codex/AGENTS.md" 2>/dev/null || true
 fi
-if [ -f "$HOME/.codex/hooks.json" ]; then
-  # Nested box: $HOME/.codex is already this profile (same inode); GNU cp errors.
-  if [ ! "$HOME/.codex/hooks.json" -ef "$PROFILE_DIR/.codex/hooks.json" ]; then
-    cp -u "$HOME/.codex/hooks.json" "$PROFILE_DIR/.codex/hooks.json"
-  fi
-fi
 
 # Prefer an explicit BWRAP_BIN (tests), then distro bwrap: on Ubuntu 24.04+
 # Homebrew bwrap lacks the AppArmor profile and fails with
@@ -201,47 +195,7 @@ elif [ -d "/run/user/$(id -u)" ]; then
   RUNTIME_BIND=(--bind "/run/user/$(id -u)" "/run/user/$(id -u)")
 fi
 
-RENAME_BRIDGE_PID=""
-RENAME_SOCKET_INNER=""
-TMUX_PANE_VALUE="$(printenv TMUX_PANE 2>/dev/null || true)"
-if [ -n "$TMUX_PANE_VALUE" ]; then
-  WINDOW_ID="$(tmux display-message -p -t "$TMUX_PANE_VALUE" '#{window_id}' 2>/dev/null || true)"
-  if [ -n "$WINDOW_ID" ]; then
-    SOCKET_NAME="codex-box-rename-$BASHPID.sock"
-    # /tmp is visible to Codex workspace-write; ~/.codex-containers is not.
-    RENAME_SOCKET_HOST="/tmp/$SOCKET_NAME"
-    RENAME_SOCKET_INNER="$RENAME_SOCKET_HOST"
-    "$HOME/.local/bin/codex-box-rename-bridge" "$RENAME_SOCKET_HOST" "$WINDOW_ID" "$TMUX_PANE_VALUE" &
-    RENAME_BRIDGE_PID=$!
-    for attempt in {1..50}; do
-      if [ -S "$RENAME_SOCKET_HOST" ]; then
-        break
-      fi
-      sleep 0.02
-    done
-    if [ ! -S "$RENAME_SOCKET_HOST" ]; then
-      echo "Warning: Workmux relay did not start; automatic window updates unavailable." >&2
-      kill "$RENAME_BRIDGE_PID" 2>/dev/null || true
-      wait "$RENAME_BRIDGE_PID" 2>/dev/null || true
-      RENAME_BRIDGE_PID=""
-      RENAME_SOCKET_INNER=""
-    fi
-  fi
-fi
-
-cleanup_rename_bridge() {
-  if [ -n "$RENAME_BRIDGE_PID" ]; then
-    kill "$RENAME_BRIDGE_PID" 2>/dev/null || true
-    wait "$RENAME_BRIDGE_PID" 2>/dev/null || true
-  fi
-}
-trap cleanup_rename_bridge EXIT
-
-if [ -n "${TMUX_PANE:-}" ] && [ -z "${WORKMUX_DISABLE_SET_WINDOW_STATUS:-}" ]; then
-  workmux register-agent >/dev/null 2>&1 || true
-fi
-
-"$BWRAP_BIN" \
+exec "$BWRAP_BIN" \
   --ro-bind / / \
   --dev /dev \
   --proc /proc \
@@ -253,6 +207,5 @@ fi
   --bind "$HOME/.local/state/openusage" "$HOME/.local/state/openusage" \
   --setenv HOME "$HOME" \
   --setenv CODEX_ACCOUNT "$ACCOUNT" \
-  --setenv CODEX_BOX_RENAME_SOCKET "$RENAME_SOCKET_INNER" \
   --chdir "$PWD" \
   "$CODEX_BIN" --no-alt-screen "$@"

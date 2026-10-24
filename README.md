@@ -1,7 +1,7 @@
 # Personal dotfiles
 
 `dotfiles` is the source of truth for Neovim, Foot, WezTerm, zsh, tmux
-customizations, shared agent instructions, the workmux skill, lifecycle hooks
+customizations, shared agent instructions, the workmux skill
 and box launchers. Installed paths point here; edit and commit files in this
 repo.
 
@@ -24,16 +24,14 @@ python3 ~/dotfiles/scripts/install.py
 
 The installer links Neovim, Foot, WezTerm, `.zshrc`, tmux's local config, oh-my-tmux
 (`~/.tmux-omt` cloned if missing), workmux config, shared rules, skills and
-helper commands. It merges tracked lifecycle hooks into Codex, Claude and
-Antigravity, retaining custom hooks and other settings. Re-run it after changing
-hook templates. Replaced files and directories are preserved in
+helper commands. It removes agent hooks from host and box configs while
+preserving other settings. Replaced files and directories are preserved in
 `~/.local/state/vsvimsettings/backups/<timestamp>/`, with their original paths.
-Running it again leaves correct links and unchanged hooks alone.
+Running it again leaves correct links and settings alone.
 
-Keep `~/.local/bin` on PATH. Authenticate agent CLIs separately. Codex needs
-`hooks = true` under `[features]` in `~/.codex/config.toml`; review and trust
-installed hooks when Codex asks. This repo does not copy credentials or hook
-trust hashes.
+Keep `~/.local/bin` on PATH. Authenticate agent CLIs separately. Agent hooks
+are disabled. Tmux naming runs once at session startup through `agents/AGENTS.md`.
+This repo does not copy credentials or machine trust.
 
 Install the native workmux binary at `~/.local/libexec/workmux` **before** using
 this repo's `workmux` wrapper. On a fresh machine with a native workmux already
@@ -44,9 +42,9 @@ install -Dm755 "$(command -v workmux)" ~/.local/libexec/workmux
 python3 ~/dotfiles/scripts/install.py
 ```
 
-The wrapper provides grouped dashboards and routes lifecycle events through the
-host relay for boxed Codex. Box launchers need bubblewrap and are Linux only.
-Existing Codex and AGY boxes sync host rules/hooks on their next launch.
+The wrapper provides the dashboard with Esc-to-quit support. Box launchers need
+bubblewrap and are Linux only. Existing Codex and AGY boxes sync host rules on
+their next launch.
 
 `workmux/review.yaml` is a template: replace its agent pane command in a temporary
 overlay with the box you chose, including Codex's update-prompt flag. No account

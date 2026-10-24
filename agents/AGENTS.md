@@ -39,7 +39,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 
 ## Dotfiles source
 
-The dotfiles repo is the source for these rules, the workmux skill, agent hooks, workmux config, Neovim, tmux, WezTerm and Zed. Find it with `dirname "$(readlink ~/.config/nvim)"`. Installed paths link there or merge the tracked hook templates. Edit and commit the source; restore with `python3 <repo>/scripts/install.py`. Keep credentials, sessions, caches and task logs outside the repo.
+The dotfiles repo is the source for these rules, the workmux skill, workmux config, Neovim, tmux, WezTerm and Zed. Find it with `dirname "$(readlink ~/.config/nvim)"`. Installed paths link there. Edit and commit the source; restore with `python3 <repo>/scripts/install.py`. Keep credentials, sessions, caches and task logs outside the repo.
 
 ## Worktrees
 
@@ -47,8 +47,9 @@ Always place git worktrees under `.worktrees/` (e.g., `.worktrees/<feature-name>
 
 ## Tmux task names
 
-- When running inside tmux (`$TMUX` and `$TMUX_PANE` are set), rename your own window at the start of a task to a concise 2–5 word summary, such as `Fix login bug` or `Review auth changes`.
-- Update the name when the user's task meaningfully changes, not for every tool call or implementation step.
+- At the start of a new agent session inside tmux (`$TMUX` and `$TMUX_PANE` are set), rename your own window once to a concise 2–5 word summary, such as `Fix login bug` or `Review auth changes`.
+- Leave the name alone for the rest of the session, including task changes, follow-ups, resumes and compaction. Do not recheck or maintain it.
+- Keep naming in these instructions. Do not install or enable agent hooks.
 - Use `tmux rename-window -t "$TMUX_PANE" 'Short task summary'`, replacing the example with the actual task and safely quoting it as literal text.
 - Do not change `window-status-format`, `window-status-current-format`, or theme colours. Window tabs stay Catppuccin mocha from `tmux.conf.local`.
 - Target only your own pane's window. Do not rename tmux sessions: workmux uses session names as stable handles. If multiple agents share one window, only the primary agent should rename it.

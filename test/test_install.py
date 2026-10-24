@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise restore in a disposable home, including backups and custom hooks."""
+"""Exercise restore in a disposable home, including backups and hook removal."""
 
 import json
 import os
@@ -40,7 +40,7 @@ class RestoreTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(helper.read_text(), "user-owned helper\n")
 
-    def test_restore_preserves_files_hooks_and_is_repeatable(self):
+    def test_restore_preserves_settings_removes_hooks_and_is_repeatable(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             self.seed_oh_my_tmux(home)
@@ -71,20 +71,63 @@ class RestoreTests(unittest.TestCase):
             self.assertTrue(os.access(home / ".local/bin/sesh-switch", os.X_OK))
             self.assertEqual(skill.resolve(), ROOT / "agents/skills/workmux")
             self.assertEqual((home / ".codex/skills/workmux").resolve(), skill.resolve())
-            self.assertEqual((home / ".local/bin/workmux-agent-hook").resolve(), ROOT / "agents/skills/workmux/scripts/workmux-agent-hook")
+            self.assertFalse((home / ".local/bin/workmux-agent-hook").exists())
             backups = list((home / ".local/state/vsvimsettings/backups").iterdir())
             self.assertEqual(len(backups), 1)
             self.assertEqual((backups[0] / ".config/nvim/init.lua").read_text(), "original config\n")
             self.assertEqual((backups[0] / ".config/agents/skills/workmux/local.txt").read_text(), "local skill\n")
             settings = json.loads(claude.read_text())
             self.assertEqual(settings["permissions"], {"allow": []})
-            self.assertEqual(settings["hooks"]["SessionStart"][0]["hooks"], [custom])
-            self.assertIn("custom", json.loads(agy.read_text()))
+            self.assertNotIn("hooks", settings)
+            self.assertEqual(json.loads(agy.read_text()), {})
             first = claude.read_text()
             result = self.run_install(home)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(claude.read_text(), first)
             self.assertEqual(list(backups[0].parent.iterdir()), backups)
+
+    def test_restore_removes_hooks_from_host_and_boxes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            self.seed_oh_my_tmux(home)
+            paths = (
+                ".codex/hooks.json", ".claude/settings.local.json", ".cursor/hooks.json",
+                ".codex-containers/test/.codex/hooks.json",
+                ".agy-containers/test/.gemini/config/hooks.json",
+                ".agent-containers/test/.cursor/hooks.json",
+            )
+            for rel in paths:
+                path = home / rel
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps({"hooks": {"Stop": [{"hooks": [
+                    {"type": "command", "command": "custom-hook"}
+                ]}]}}))
+            plugins = ("workmux-status.ts", "session-tracker.js")
+            for name in plugins:
+                path = home / ".config/opencode/plugins" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("old hook\n")
+            for name in ("workmux-agent-hook", "codex-box-rename-bridge"):
+                path = home / ".local/bin" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.symlink_to(ROOT / "agents/skills/workmux/scripts" / name)
+            result = self.run_install(home)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            for rel in paths:
+                self.assertEqual(json.loads((home / rel).read_text()), {}, rel)
+                saved = list((home / ".local/state/vsvimsettings/backups").glob(f"*/{rel}"))
+                self.assertEqual(len(saved), 1, rel)
+                self.assertIn("hooks", json.loads(saved[0].read_text()))
+            for name in plugins:
+                self.assertFalse((home / ".config/opencode/plugins" / name).exists())
+                saved = list((home / ".local/state/vsvimsettings/backups").glob(f"*/.config/opencode/plugins/{name}"))
+                self.assertEqual(len(saved), 1)
+                self.assertEqual(saved[0].read_text(), "old hook\n")
+            for name in ("workmux-agent-hook", "codex-box-rename-bridge"):
+                self.assertFalse((home / ".local/bin" / name).is_symlink())
+            result = self.run_install(home)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(len(list((home / ".local/state/vsvimsettings/backups").iterdir())), 1)
 
     def test_fresh_home_links_zed_and_workmux(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -96,6 +139,8 @@ class RestoreTests(unittest.TestCase):
                 self.assertEqual((home / ".config/zed" / name).resolve(), ROOT / "zed" / name)
             self.assertEqual((home / ".config/workmux/config.yaml").resolve(), ROOT / "workmux/config.yaml")
             self.assertEqual((home / ".config/workmux/review.yaml").resolve(), ROOT / "workmux/review.yaml")
+            self.assertFalse((home / ".codex/hooks.json").exists())
+            self.assertFalse((home / ".gemini/config/hooks.json").exists())
 
     def test_which_key_config_linked_when_plugin_present(self):
         with tempfile.TemporaryDirectory() as directory:

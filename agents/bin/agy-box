@@ -141,22 +141,6 @@ fi
 mkdir -p "$PROFILE_DIR/.gemini/antigravity-cli" "$HOME/.local/state/openusage"
 
 
-# Sync Workmux's official lifecycle hook group, preserving profile hooks.
-if [ -f "$HOME/.gemini/config/hooks.json" ]; then
-  python3 - "$HOME/.gemini/config/hooks.json" "$PROFILE_DIR/.gemini/config/hooks.json" <<'WORKMUX_HOOK_SYNC'
-import json
-import pathlib
-import sys
-source = json.loads(pathlib.Path(sys.argv[1]).read_text())
-path = pathlib.Path(sys.argv[2])
-if "workmux-status" in source:
-    profile = json.loads(path.read_text()) if path.exists() else {}
-    profile["workmux-status"] = source["workmux-status"]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(profile, indent=2) + "\n")
-WORKMUX_HOOK_SYNC
-fi
-
 # Re-sync global skills, workflows, agents, and rules into the box on every launch
 for src in workflows global_workflows skills agents rules; do
   if [ -d "$HOME/.gemini/config/$src" ]; then
@@ -200,10 +184,6 @@ if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -d "$XDG_RUNTIME_DIR" ]; then
   RUNTIME_BIND=(--bind "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR")
 elif [ -d "/run/user/$(id -u)" ]; then
   RUNTIME_BIND=(--bind "/run/user/$(id -u)" "/run/user/$(id -u)")
-fi
-
-if [ -n "${TMUX_PANE:-}" ] && [ -z "${WORKMUX_DISABLE_SET_WINDOW_STATUS:-}" ]; then
-  workmux register-agent >/dev/null 2>&1 || true
 fi
 
 exec "$BWRAP_BIN" \

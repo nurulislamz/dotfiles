@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Restore dotfiles links and merge Workmux hooks; preserve replaced files."""
+"""Restore dotfiles links and remove agent hooks; preserve replaced files."""
 
 import json
 import os
@@ -26,26 +26,6 @@ def link(source, destination, backup):
     destination.symlink_to(source, target_is_directory=source.is_dir())
 
 
-def merge_hooks(current, template, agent):
-    if agent == "agy":
-        return {**current, **template}
-    merged = dict(current)
-    hooks = dict(current.get("hooks", {}))
-    for event, groups in hooks.items():
-        kept = []
-        for group in groups:
-            entries = [entry for entry in group["hooks"] if not entry.get("command", "").startswith(
-                ("workmux register-agent", "workmux set-window-status ")
-            )]
-            if entries:
-                kept.append({**group, "hooks": entries})
-        hooks[event] = kept
-    for event, groups in template["hooks"].items():
-        hooks[event] = hooks.get(event, []) + groups
-    merged["hooks"] = hooks
-    return merged
-
-
 def ensure_oh_my_tmux(home):
     dest = home / ".tmux-omt"
     if (dest / ".tmux.conf").exists():
@@ -70,24 +50,35 @@ def ensure_oh_my_tmux(home):
 
 def install():
     home = Path.home()
-    # Validate every hook config before replacing any installed files.
+    # Validate every config before replacing any installed files.
     updates = []
-    for agent, target in (
-        ("codex", ".codex/hooks.json"),
-        ("claude", ".claude/settings.json"),
-        ("agy", ".gemini/config/hooks.json"),
+    for pattern in (
+        ".codex/hooks.json", ".claude/settings*.json", ".cursor/hooks.json",
+        ".gemini/config/hooks.json", ".codex-containers/*/.codex/hooks.json",
+        ".agy-containers/*/.gemini/config/hooks.json",
+        ".agent-containers/*/.cursor/hooks.json",
     ):
-        destination = home / target
-        current = json.loads(destination.read_text()) if destination.exists() else {}
-        template = json.loads((ROOT / f"agents/hooks/{agent}.json").read_text())
-        merged = merge_hooks(current, template, agent)
-        updates.append((destination, current, merged))
+        for destination in sorted(home.glob(pattern)):
+            current = json.loads(destination.read_text())
+            if not isinstance(current, dict):
+                raise ValueError(f"Expected a JSON object in {destination}")
+            cleaned = {} if ".gemini" in destination.parts else {
+                key: value for key, value in current.items() if key != "hooks"
+            }
+            updates.append((destination, current, cleaned))
 
-    retired = home / ".local/bin/tmux-tasklog"
-    if retired.is_symlink() and retired.resolve() == ROOT / "agents/skills/workmux/scripts/tmux-tasklog":
-        retired.unlink()
+    for name in ("tmux-tasklog", "workmux-agent-hook", "codex-box-rename-bridge"):
+        retired = home / ".local/bin" / name
+        if retired.is_symlink() and retired.resolve() == ROOT / "agents/skills/workmux/scripts" / name:
+            retired.unlink()
 
     backup = home / ".local/state/vsvimsettings/backups" / str(time.time_ns())
+    for name in ("workmux-status.ts", "session-tracker.js"):
+        plugin = home / ".config/opencode/plugins" / name
+        if os.path.lexists(plugin):
+            saved = backup / plugin.relative_to(home)
+            saved.parent.mkdir(parents=True, exist_ok=True)
+            plugin.rename(saved)
     paths = {
         ".config/nvim": "nvim",
         ".config/wezterm": "wezterm",
@@ -115,8 +106,6 @@ def install():
         paths[f"{directory}/workmux"] = "agents/skills/workmux"
     for source in sorted((ROOT / "agents/bin").iterdir()):
         paths[f".local/bin/{source.name}"] = str(source.relative_to(ROOT))
-    for name in ("workmux-agent-hook", "codex-box-rename-bridge"):
-        paths[f".local/bin/{name}"] = f"agents/skills/workmux/scripts/{name}"
     paths[".local/bin/cursor-box"] = "agents/bin/agent-box"
     paths[".local/bin/sesh-switch"] = "tmux/sesh-switch.sh"
     omt = ensure_oh_my_tmux(home)
@@ -129,7 +118,6 @@ def install():
     if which_key.is_dir():
         link(ROOT / "tmux/config.yaml", which_key / "config.yaml", backup)
 
-    (home / ".local/state/workmux").mkdir(parents=True, exist_ok=True)
     for destination, current, merged in updates:
         if destination.exists() and current == merged:
             continue
@@ -138,7 +126,7 @@ def install():
             saved = backup / destination.relative_to(home)
             saved.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(destination, saved)
-        # Replace atomically; a local symlink must not write into the tracked template.
+        # Replace atomically so an interrupted write cannot corrupt settings.
         with tempfile.NamedTemporaryFile(mode="w", dir=destination.parent, delete=False) as stream:
             json.dump(merged, stream, indent=2)
             stream.write("\n")
@@ -146,7 +134,7 @@ def install():
             os.replace(stream.name, destination)
         finally:
             Path(stream.name).unlink(missing_ok=True)
-    print(f"Restored links and hooks from {ROOT}")
+    print(f"Restored links and removed agent hooks from {ROOT}")
 
 
 if __name__ == "__main__":

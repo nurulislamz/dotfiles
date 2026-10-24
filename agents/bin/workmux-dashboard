@@ -9,88 +9,12 @@ import pathlib
 import pty
 import select
 import signal
-import subprocess
 import sys
 import termios
 from typing import Any
 import tty
 
 NATIVE = str(pathlib.Path.home() / ".local/libexec/workmux")
-
-
-def is_generic_title(t: str, hostname: str) -> bool:
-    clean = t.strip().lower()
-    if not clean or clean == hostname or clean == "desktop":
-        return True
-    if clean in ("bash", "zsh", "sh", "fish", "nvim", "workmux"):
-        return True
-    if clean.startswith("agy") or clean.startswith("claude"):
-        return True
-    if "@" in clean and ":" in clean:
-        return True
-    return False
-
-
-def is_generic_window(w: str) -> bool:
-    clean = w.strip().lower()
-    if not clean or clean in ("bash", "zsh", "sh", "fish", "nvim", "workmux"):
-        return True
-    if " | " in clean:
-        _, right = clean.split(" | ", 1)
-        if right in ("bash", "zsh", "sh", "fish", "nvim", "workmux", "agy"):
-            return True
-    return False
-
-
-def tag_pane_titles_with_session() -> None:
-    try:
-        import socket
-
-        hostname = socket.gethostname().lower()
-        out = subprocess.check_output(
-            [
-                "tmux",
-                "list-panes",
-                "-a",
-                "-F",
-                "#{pane_id}\t#{session_name}\t#{window_name}\t#{pane_title}\t#{pane_current_command}",
-            ],
-            text=True,
-            timeout=2,
-        )
-        for line in out.splitlines():
-            parts = line.split("\t")
-            if len(parts) >= 5:
-                pane_id, session, win, title, cmd = parts[:5]
-                session_clean = session.strip().lstrip('"')
-                if not session_clean:
-                    continue
-
-                t = title.strip()
-                if t.startswith(f"[{session_clean}]"):
-                    t = t[len(session_clean) + 2 :].strip()
-                elif t.startswith("[") and "] " in t:
-                    t = t.split("] ", 1)[1].strip()
-
-                if not is_generic_title(t, hostname):
-                    chosen = t
-                elif not is_generic_window(win):
-                    chosen = win.strip()
-                else:
-                    chosen = t if t and t.lower() not in (hostname, "desktop") else cmd
-
-                if " | " in chosen:
-                    chosen = chosen.split(" | ")[0].strip()
-
-                new_title = chosen
-                if new_title != title:
-                    subprocess.run(
-                        ["tmux", "select-pane", "-t", pane_id, "-T", new_title],
-                        check=False,
-                        timeout=1,
-                    )
-    except Exception:
-        pass
 
 
 def set_winsize(src: int, dst: int) -> None:
@@ -111,8 +35,6 @@ def main() -> int:
 
     if not (sys.stdin.isatty() and sys.stdout.isatty()):
         run_passthrough()
-
-    tag_pane_titles_with_session()
 
     pid, master = pty.fork()
     if pid == 0:

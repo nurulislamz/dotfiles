@@ -111,7 +111,7 @@ bash ~/dotfiles/scripts/setup-agents.sh
 
 The script installs missing Antigravity, Codex, Oh My Pi (`omp`) and Cursor Agent
 CLIs, preserves the real AGY executable before linking its wrapper, then runs
-`scripts/install.py`. This restores all dotfiles links/hooks, including shell
+`scripts/install.py`. This restores all dotfiles links, including shell
 and editor configuration. Existing replacements use the installer's backups.
 It also links shared rules at `~/.omp/AGENTS.md` and `~/.config/omp/AGENTS.md`,
 and the workmux skill at `~/.omp/agent/skills/workmux`; replaced OMP paths are
@@ -145,7 +145,7 @@ Keep `~/.local/bin` on PATH. If using a custom `AGY_REAL_BIN`, export that same
 path in future shells too. The standard preserved path is `~/.local/bin/agy-real`.
 
 Tracked: launcher code, named-profile inventory, shared instructions, workmux
-skill, hook templates and workmux configuration. Not transferred: credentials,
+skill and workmux configuration. Not transferred: credentials,
 API keys, sessions/history, machine trust, private MCP configuration, extra
 locally installed skills/extensions, or per-account model/provider settings.
 OMP's local databases and `~/.omp/agent/config.yml` stay outside Git.
@@ -160,13 +160,13 @@ Install sources: [Antigravity](https://github.com/google-antigravity/antigravity
 [Cursor Agent](https://cursor.com/docs/cli/installation).
 Only missing CLIs are downloaded; installed versions are retained.
 
-## 5. Restore links, hooks and plugins
+## 5. Restore links and plugins
 
 ```sh
 ~/dotfiles/scripts/bootstrap
 ```
 
-Bootstrap runs Brewfile installation when `brew` exists, restores links/hooks,
+Bootstrap runs Brewfile installation when `brew` exists, restores links,
 restores Neovim's locked plugins, and attempts tmux plugin installation.
 On Linux with Homebrew installed, avoid its macOS casks: run these steps manually:
 
@@ -188,10 +188,10 @@ modal, replay and cmdpicker on startup; `wezterm/wezterm.sh` supplies shell
 semantic zones for replay.
 
 Links cover Neovim, WezTerm, zsh, tmux, workmux, Zed, shared agent rules,
-the workmux skill and helper commands. Hook templates merge into Codex,
-Claude and Antigravity settings. Replaced configs are backed up under
+the workmux skill and helper commands. Agent hooks are removed from host and
+box configs while other settings are preserved. Replaced configs are backed up under
 `~/.local/state/vsvimsettings/backups/<timestamp>/`. Rerunning preserves
-correct links and unchanged hooks. Ghostty and IdeaVim configs remain stored
+correct links and settings. Ghostty and IdeaVim configs remain stored
 only; the installer does not apply them.
 
 Make `~/.local/bin` available on PATH. Start zsh and, if desired, set it as the
@@ -202,8 +202,8 @@ the optional Command Code file is `~/.secrets/commandcode.env`.
 
 The shell's `open` alias expects `~/.local/bin/open`, which this repo does not
 provide. Restore that local helper or explicitly adjust the alias on the new
-machine. Review agent hook trust prompts and each agent's hook settings during
-its own setup; authentication and machine trust are not transferred.
+machine. Authentication and machine trust are not transferred. Agent hooks stay
+disabled. Agents name their tmux window once at session startup through `AGENTS.md`.
 
 ## 6. Verify on the target machine
 

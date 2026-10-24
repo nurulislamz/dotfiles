@@ -10,7 +10,9 @@ description: >-
 
 # workmux
 
-Shared by Cursor, Codex, Claude, OpenCode, and Antigravity. Source: `<repo>/agents/skills/workmux` in the dotfiles repo (`dirname "$(readlink ~/.config/nvim)"`). Installed skill dirs and `~/.config/agents/skills/workmux` link here; edit the dotfiles source. Restore links, helpers, rules and hooks with `python3 <repo>/scripts/install.py`.
+Shared by Cursor, Codex, Claude, OpenCode, and Antigravity. Source: `<repo>/agents/skills/workmux` in the dotfiles repo (`dirname "$(readlink ~/.config/nvim)"`). Installed skill dirs and `~/.config/agents/skills/workmux` link here; edit the dotfiles source. Restore links, helpers and rules with `python3 <repo>/scripts/install.py`.
+
+Agent hooks are disabled. Do not run `workmux setup --hooks`. Name tmux windows once at session startup as `AGENTS.md` instructs.
 
 Binary: `~/.local/bin/workmux` (`workmux 0.1.271`).
 Global config: `~/.config/workmux/config.yaml`.
@@ -49,7 +51,7 @@ Model, effort, and `fast` are optional spawn parameters. Do not pin them in `~/.
 codex-box <box> -m <model> -c model_reasoning_effort="<effort>" -c service_tier="fast" -c check_for_update_on_startup=false
 ```
 
-Workmux hooks (`post_create`, `pre_merge`, `pre_remove`, `workmux setup --hooks`) do not dismiss agent TUI questions. `post_create` runs before the pane exists; setup hooks only set working/waiting/done. Always pass `-c check_for_update_on_startup=false` on Codex/codex-box pane commands so the update prompt does not block.
+Workmux worktree hooks (`post_create`, `pre_merge`, `pre_remove`) do not dismiss agent TUI questions. `post_create` runs before the pane exists. Always pass `-c check_for_update_on_startup=false` on Codex/codex-box pane commands so the update prompt does not block.
 
 After `workmux add`, create/open the Codex window via workmux (do not type the launch command into a leftover shell). Then `workmux capture` / `tmux capture-pane`. If a TUI dialog is up, answer it with `tmux send-keys` — prefer skip/decline upgrades (`n`, highlight Skip/No + Enter, Esc). `F2` opens the warning tray; Esc dismisses it. `-P` with a custom overlay `command:` writes `.workmux/PROMPT-*.md` but does not inject into Codex; once the composer shows `Ask Codex to do anything`, `workmux send <handle> "$(cat …/PROMPT-*.md)"`. Do not expect-script a general wizard.
 
@@ -63,7 +65,7 @@ workmux add <handle> --config <boxed-review-overlay> -b -P "$tmpfile"
 
 Put a worktree **in the current tmux session**: `--mode window --parent-session "$(tmux display-message -p '#{session_name}')"`. Default config is still session-per-worktree.
 
-Existing tree, dead/wrong pane: `workmux close <handle>` then `add -o` with the boxed command. `status`/`capture` stay empty until `workmux setup --hooks`; confirm via the pane command.
+Existing tree, dead/wrong pane: `workmux close <handle>` then `add -o` with the boxed command. Confirm startup with `workmux capture` or `tmux capture-pane`. Automatic working/waiting/done status updates are disabled.
 
 `workmux rename <old> <new> [-b]` renames worktree/session; `-b` also renames the branch.
 
@@ -97,7 +99,7 @@ Reads the current conversation ID from the environment. If missing, pass `--sess
 
 On this machine it launches `codex-box <current-account> fork --no-daemon <exact-id>` (or `codex fork` outside a box). `--no-daemon` avoids the missing app-server socket. `workmux run` disconnects stdin and is unsuitable.
 
-Clears inherited parent session/relay/status IDs, verifies `forked_from_id`, and registers the pane if the startup hook did not. Success = live pane in the requested location and an entry in `workmux status --all --json`. Forked chats start idle unless the user gives a task.
+Clears inherited parent session/relay/status IDs, verifies `forked_from_id`, and registers the pane directly. Success = live pane in the requested location and an entry in `workmux status --all --json`. Forked chats start idle unless the user gives a task.
 
 If startup fails, inspect the named pane. Do not create another pane blindly. Leave the shared window/session name unchanged.
 
