@@ -509,6 +509,8 @@ bind -T root MouseDown3Pane if-shell -F -t = "#{||:#{mouse_any_flag},#{pane_in_m
 bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?#{mouse},on,off}'
 
 set -g alternate-screen on
+# Claude Code classic renderer: output stays in tmux scrollback so Alt+j/k can scroll it.
+set-environment -g CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN 1
 
 # move status line to bottom
 set -g status-position bottom
