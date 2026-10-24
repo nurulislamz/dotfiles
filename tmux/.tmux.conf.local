@@ -466,21 +466,21 @@ bind -n C-BSpace send-keys M-BSpace #!important
 bind -n PageUp if-shell -F '#{alternate_on}' 'send-keys PageUp' 'copy-mode -eu' #!important
 bind -n PageDown if-shell -F '#{pane_in_mode}' 'send-keys -X page-down' 'send-keys PageDown' #!important
 
-# Alt+k/j = 2-line smooth scroll; Alt+K/J = 8-line. Pass through on alt-screen.
+# Alt+k/j = 2-line smooth scroll; Alt+K/J = 4-line. Pass through on alt-screen.
 # Numeric scroll.sh args so tmux-smooth-scroll does not flatten these to @smooth-scroll-normal.
-bind -n M-k if-shell -F '#{alternate_on}' 'send-keys M-k' 'copy-mode -e ; run-shell -b "$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2"' #!important
-bind -n M-j if-shell -F '#{alternate_on}' 'send-keys M-j' 'if-shell -F "#{pane_in_mode}" "run-shell -b \"$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2\""' #!important
-bind -n M-K if-shell -F '#{alternate_on}' 'send-keys M-K' 'copy-mode -e ; run-shell -b "$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 8"' #!important
-bind -n M-J if-shell -F '#{alternate_on}' 'send-keys M-J' 'if-shell -F "#{pane_in_mode}" "run-shell -b \"$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 8\""' #!important
+bind -n M-k if-shell -F '#{alternate_on}' 'send-keys M-k' 'copy-mode -e ; run-shell -b "TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2"' #!important
+bind -n M-j if-shell -F '#{alternate_on}' 'send-keys M-j' 'if-shell -F "#{pane_in_mode}" "run-shell -b \"TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2\""' #!important
+bind -n M-K if-shell -F '#{alternate_on}' 'send-keys M-K' 'copy-mode -e ; run-shell -b "TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 4"' #!important
+bind -n M-J if-shell -F '#{alternate_on}' 'send-keys M-J' 'if-shell -F "#{pane_in_mode}" "run-shell -b \"TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 4\""' #!important
 
-bind -T copy-mode-vi M-k run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2' #!important
-bind -T copy-mode-vi M-j run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2' #!important
-bind -T copy-mode-vi M-K run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 8' #!important
-bind -T copy-mode-vi M-J run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 8' #!important
-bind -T copy-mode M-k run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2' #!important
-bind -T copy-mode M-j run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2' #!important
-bind -T copy-mode M-K run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 8' #!important
-bind -T copy-mode M-J run-shell -b '$HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 8' #!important
+bind -T copy-mode-vi M-k run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2' #!important
+bind -T copy-mode-vi M-j run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2' #!important
+bind -T copy-mode-vi M-K run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 4' #!important
+bind -T copy-mode-vi M-J run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 4' #!important
+bind -T copy-mode M-k run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 2' #!important
+bind -T copy-mode M-j run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 2' #!important
+bind -T copy-mode M-K run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh up 4' #!important
+bind -T copy-mode M-J run-shell -b 'TMUX_PANE=#{pane_id} $HOME/.tmux/plugins/tmux-smooth-scroll/src/scroll.sh down 4' #!important
 bind -T copy-mode-vi C-u send-keys -X halfpage-up
 bind -T copy-mode-vi C-d send-keys -X halfpage-down
 bind -T copy-mode C-u send-keys -X halfpage-up

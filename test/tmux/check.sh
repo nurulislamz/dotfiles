@@ -31,6 +31,7 @@ check "smooth-scroll-speed" 30 "$(tmux -L $SOCK show -gv @smooth-scroll-speed)"
 check "smooth-scroll-mouse" true "$(tmux -L $SOCK show -gv @smooth-scroll-mouse)"
 check "C-u not important" 0 "$(grep -c 'copy-mode-vi C-u.*#!important' "$HOME/.tmux.conf.local" || true)"
 check "M-k smooth 2-line" 1 "$(tmux -L $SOCK list-keys -T copy-mode-vi | grep -c 'scroll.sh up 2' || true)"
+check "M-K smooth 4-line targets pane" 1 "$(tmux -L $SOCK list-keys -T copy-mode-vi | grep -c 'TMUX_PANE=#{pane_id} .*scroll.sh up 4' || true)"
 check "no prefix C-a" 0 "$(tmux -L $SOCK list-keys -T prefix | grep -c 'C-a' || true)"
 prefix2=$(tmux -L $SOCK show -gv prefix2 2>/dev/null || true)
 case "$prefix2" in
