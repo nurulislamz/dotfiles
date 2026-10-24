@@ -1,5 +1,7 @@
 # Spec: workmux + agent spawn e2e
 
+Historical record. Task-file tracking and its runnable prompts have been removed.
+
 Location: `~/.config/agents/skills/workmux/scripts/e2e_spawn_plan.md`\
 Executable: `~/.config/agents/skills/workmux/scripts/e2e_spawn_prompt.md`
 

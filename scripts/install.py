@@ -83,6 +83,10 @@ def install():
         merged = merge_hooks(current, template, agent)
         updates.append((destination, current, merged))
 
+    retired = home / ".local/bin/tmux-tasklog"
+    if retired.is_symlink() and retired.resolve() == ROOT / "agents/skills/workmux/scripts/tmux-tasklog":
+        retired.unlink()
+
     backup = home / ".local/state/vsvimsettings/backups" / str(time.time_ns())
     paths = {
         ".config/nvim": "nvim",
@@ -111,7 +115,7 @@ def install():
         paths[f"{directory}/workmux"] = "agents/skills/workmux"
     for source in sorted((ROOT / "agents/bin").iterdir()):
         paths[f".local/bin/{source.name}"] = str(source.relative_to(ROOT))
-    for name in ("tmux-tasklog", "workmux-agent-hook", "codex-box-rename-bridge"):
+    for name in ("workmux-agent-hook", "codex-box-rename-bridge"):
         paths[f".local/bin/{name}"] = f"agents/skills/workmux/scripts/{name}"
     paths[".local/bin/cursor-box"] = "agents/bin/agent-box"
     paths[".local/bin/sesh-switch"] = "tmux/sesh-switch.sh"

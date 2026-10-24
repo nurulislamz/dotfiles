@@ -54,34 +54,6 @@ Always place git worktrees under `.worktrees/` (e.g., `.worktrees/<feature-name>
 - Target only your own pane's window. Do not rename tmux sessions: workmux uses session names as stable handles. If multiple agents share one window, only the primary agent should rename it.
 - Skip renaming outside tmux. If the target is unavailable, continue the task without renaming.
 
-## Session task tracking
-
-The file is always `task.md`. Workmux worktrees use `<worktree>/.workmux/task.md`; other sessions use the helper's state path. Prefix+t opens it.
-
-Resolve with exactly this command. Do not build the path. `$TASK_FILE` is unset in agent processes.
-
-```bash
-TASK_FILE=$(tmux-tasklog path)
-```
-
-That command creates the file if needed. Read it at the start of a task. Do not skip because the variable is empty or you think the file is missing. Bare task requests without explicit domain qualifiers (e.g. `create tasks x y z`, `add task`) target this file directly; do not probe backend models, routes, or databases.
-
-- **Tasks:** one line under `## Tasks`: `- [ ] T<n> title` (pending), `[>]` (working), `[x]` (done), `[!]` (blocked). New ID = max existing ID + 1, or T1. Never reuse or renumber IDs; preserve existing lines and titles except the assigned status mark. Convert migrated unnumbered tasks only when touching them; monitors ignore them.
-- At task start, read Tasks and Notes. With an assigned ID, work only that ID: mark `[>]` now, `[x]` when done, `[!]` if blocked, then stop and wait. Without a monitor, append a numbered pending line for the current work and use the same status sequence.
-- Anyone may append numbered pending tasks mid-run. Bare add/create task requests target this file.
-- **Notes:** shared inter-agent memory. Append durable decisions, paths, blockers, IDs, markers, or what was tried when the next agent needs them. Newest at the bottom. No transcripts, secrets, or prompt dumps. Read before acting.
-- One monitor and one worker per file. A monitor does no repo work; it re-resolves `TASK_FILE=$(tmux-tasklog path)` each loop and assigns the lowest pending ID only when no ID is working. Prefer worker-set `[>]`; monitor may set it if the worker accepted but omitted it.
-- Send exactly:
-
-```text
-Do T<n>: <title>
-TASK_FILE=$(tmux-tasklog path). Read Tasks and Notes.
-Mark T<n> [>] now. Mark [x] when done, [!] if blocked.
-Write Notes if the next ID will need a fact. Then stop and wait.
-```
-
-Only `[x]` completes an assignment. On `[!]`, append a Note and stop the run without reassigning or skipping that ID. On crash/no status change, report BLOCKED after a bounded wait; leave `[>]` intact. Finish when no pending or working IDs remain; include mid-run appends. Window renaming stays independent.
-
 ## Precedence
 
 A repo-local `AGENTS.md` or `CLAUDE.md` overrides this file for that repo.

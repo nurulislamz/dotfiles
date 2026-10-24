@@ -95,10 +95,6 @@ done
 [ -s "$HOME/.openclaw/completions/openclaw.zsh" ] && . "$HOME/.openclaw/completions/openclaw.zsh"
 [ -s "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
-if [[ -n "$TMUX" && -z "$TASK_FILE" ]]; then
-  export TASK_FILE="$(tmux-tasklog path)"
-fi
-
 # Antigravity CLI auto-approve permissions
 alias agy="agy --dangerously-skip-permissions"
 alias agy-box="agy-box --dangerously-skip-permissions"

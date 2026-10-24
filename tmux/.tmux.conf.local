@@ -699,11 +699,10 @@ set -as terminal-features 'wezterm:clipboard:passthrough'
 set -ga update-environment TERM
 set -ga update-environment TERM_PROGRAM
 
-# Task logs per tmux session
-set-hook -g after-new-session 'run-shell -b "tmux-tasklog init #{q:session_name} #{q:pane_current_path}"'
-bind-key t display-popup -w 85% -h 85% -E 'tmux-tasklog open' #!important
-bind-key T clock-mode
-bind-key . display-popup -w 85% -h 85% -E 'tmux-tasklog open'
+# Clear retired task logging when reloading an existing server.
+set-hook -gu after-new-session
+unbind-key t #!important
+unbind-key . #!important
 
 # Workmux agent dashboard and sidebar
 unbind-key A

@@ -9,10 +9,6 @@ nerdfont: true
 dashboard:
   agent_columns: [number, session, project, worktree, git, pr, status, time, title]
 
-# Init <worktree>/.workmux/task.md before the agent pane exists.
-post_create:
-  - tmux-tasklog init
-
 # Compact task rows with a live status indicator and a coloured separator.
 # One section per tmux session (= one worktree in session mode).
 sidebar:

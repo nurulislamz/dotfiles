@@ -1,9 +1,11 @@
 # Plan: remaining workmux live verification
 
+Historical record. Task-file tracking and its runnable prompts have been removed.
+
 Status: executed 2026-10-11; C1–C6 success paths and isolated sidebar checks PASS. Overall acceptance BLOCKED: historical Loading cannot be reproduced, C6 live failure paths untested, originating pane absent at final inventory. Results: [live-verification-results.md](live-verification-results.md).
 
-Sources: [task-md.md](task-md.md),
-[six-case prompt](../scripts/e2e_workmux_prompt.md),
+Sources: `task-md.md` (removed),
+six-case prompt (removed),
 [completed mega plan](mega-plan.md),
 [sidebar specification](sidebar-group-by-session/spec.md).
 

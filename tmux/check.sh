@@ -58,8 +58,11 @@ try:
     tm("send-keys", "-K", "-c", target, "t")
     time.sleep(0.2)
     assert tm("capture-pane", "-p", "-t", pane) == "t", "normal typing lost t"
-    assert "tmux-tasklog open" in tm("list-keys", "-T", "prefix", "t")
-    print("ok: sidebar t blocked; normal t and Prefix+t preserved")
+    for key in ("t", "."):
+        result = subprocess.run(["tmux", "-L", sys.argv[1], "list-keys", "-T", "prefix", key], capture_output=True)
+        assert result.returncode != 0, f"retired task shortcut still bound: {key}"
+    assert "tmux-tasklog" not in tm("show-hooks", "-g")
+    print("ok: sidebar guard and normal typing preserved; task shortcuts and hooks absent")
 finally:
     client.terminate()
     client.wait(timeout=5)

@@ -18,12 +18,6 @@ Docs: https://workmux.raine.dev/guide/skills/
 
 Each worktree is an isolated workspace: own branch, directory, tmux session, and agent.
 
-## task.md
-
-Task tracking and sequential monitor instructions live in the shared [AGENTS.md](../../AGENTS.md). Read its Tasks and Notes rules before acting; do not maintain a second copy here. Resolve only with `TASK_FILE=$(tmux-tasklog path)`. The helper lives in `scripts/tmux-tasklog` and is installed on PATH.
-
-For helper behavior, migration and the full task-file contract, see [task-md.md](specs/task-md.md). `post_create` initializes the file before the pane exists. Boxed processes must not inherit `TASK_FILE`.
-
 ## This machine
 
 ```yaml

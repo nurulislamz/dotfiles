@@ -1,5 +1,7 @@
 # Workmux combined execution plan
 
+Historical record. Task-file tracking and its runnable prompts have been removed.
+
 Sources: `../scripts/e2e_spawn_r2_fix.md`, `task-md.md` + `PROMPT.md`,
 `sidebar-group-by-session/spec.md` + `sidebar-group-by-session/plan.md`.
 

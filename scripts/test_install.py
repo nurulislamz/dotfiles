@@ -25,6 +25,21 @@ class RestoreTests(unittest.TestCase):
         (omt / ".tmux.conf").write_text("# dummy oh-my-tmux\n")
         return omt
 
+    def test_retired_tasklog_link_is_removed_without_deleting_user_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            self.seed_oh_my_tmux(home)
+            helper = home / ".local/bin/tmux-tasklog"
+            helper.parent.mkdir(parents=True)
+            helper.symlink_to(ROOT / "agents/skills/workmux/scripts/tmux-tasklog")
+            result = self.run_install(home)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(helper.is_symlink())
+            helper.write_text("user-owned helper\n")
+            result = self.run_install(home)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(helper.read_text(), "user-owned helper\n")
+
     def test_restore_preserves_files_hooks_and_is_repeatable(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)

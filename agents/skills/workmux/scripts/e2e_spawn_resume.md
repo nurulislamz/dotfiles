@@ -1,5 +1,7 @@
 # Workmux spawn E2E — complete
 
+Historical record. Task-file tracking and its runnable prompts have been removed.
+
 Continuation finished 2026-10-11. Selected matrix is closed: **29 PASS, 9 FAIL, 0 pending**.
 
 Leftover Codex retest the same day (not a full 38 rerun): mohammed R3–R5 PASS after `hooks.json` `-ef` skip. nurulz default is now `gpt-6-luna`; R4+R5 PASS, R3 FAIL (marker unchecked, not 400). R2 both FAIL (fork session-id lookup). R1 AC1.1 still open.
@@ -7,7 +9,7 @@ Leftover Codex retest the same day (not a full 38 rerun): mohammed R3–R5 PASS 
 ## Start here (historical)
 
 - Requirements: [e2e_spawn_plan.md](e2e_spawn_plan.md)
-- Procedure: [e2e_spawn_prompt.md](e2e_spawn_prompt.md)
+- Procedure: `e2e_spawn_prompt.md` (removed)
 - Full table: [e2e_spawn_results.md](e2e_spawn_results.md)
 - First-segment archive: [e2e_spawn_checkpoint.tar.gz](e2e_spawn_checkpoint.tar.gz)
 - Continuation evidence: [e2e_spawn_r5_evidence.tar.gz](e2e_spawn_r5_evidence.tar.gz)
