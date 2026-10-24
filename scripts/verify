@@ -1,47 +1,5 @@
 #!/bin/sh
-# Portable install + runtime contracts. Not the live WSL host audit.
+# Shim: suite lives in test/run.sh
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-status=0
-
-python3 -m unittest discover -s "$ROOT/scripts" -p 'test_*.py' || status=1
-
-if command -v nvim >/dev/null 2>&1 && [ -d "$HOME/.local/share/nvim/lazy" ]; then
-  nvim --headless "+luafile $ROOT/scripts/test-nvim-contract.lua" || status=1
-else
-  echo "skip: nvim contract (nvim or lazy data dir missing)"
-fi
-
-if command -v tmux >/dev/null 2>&1 && [ -e "$HOME/.tmux.conf.local" ]; then
-  "$ROOT/tmux/check.sh" || status=1
-else
-  echo "skip: tmux check (~/.tmux.conf.local missing)"
-fi
-
-for cmd in nvim tmux rg fzf zoxide sesh lazygit; do
-  if command -v "$cmd" >/dev/null 2>&1; then
-    echo "ok: $cmd"
-  else
-    echo "warn: missing $cmd"
-  fi
-done
-
-if command -v wezterm >/dev/null 2>&1 || [ -d /Applications/WezTerm.app ]; then
-  echo "ok: wezterm"
-else
-  echo "warn: missing wezterm"
-fi
-
-if command -v foot >/dev/null 2>&1; then
-  echo "ok: foot"
-else
-  echo "warn: missing foot"
-fi
-
-if [ -x "$HOME/.local/libexec/workmux" ]; then
-  echo "ok: native workmux"
-else
-  echo "warn: missing ~/.local/libexec/workmux"
-fi
-
-exit "$status"
+exec "$ROOT/test/run.sh"

@@ -1,14 +1,15 @@
 import json
 import os
 import re
+from pathlib import Path
 import pytest
 
-ZED_DIR = "/home/nurul/vsvimsettings/zed"
+ZED_DIR = str(Path(__file__).resolve().parent)
 SETTINGS_PATH = os.path.join(ZED_DIR, "settings.json")
 KEYMAP_PATH = os.path.join(ZED_DIR, "keymap.json")
 TASKS_PATH = os.path.join(ZED_DIR, "tasks.json")
 WIN_ROAMING_DIR = "/mnt/c/Users/nurul/AppData/Roaming/Zed"
-WSL_CONFIG_DIR = "/home/nurul/.config/zed"
+WSL_CONFIG_DIR = str(Path.home() / ".config/zed")
 
 VALID_ACTIONS = {
     "editor::Cancel",
@@ -231,7 +232,7 @@ def test_editor_harpoon(keymap):
 # ==============================================================================
 def test_settings_core(settings):
     assert settings.get("vim_mode") is True
-    assert settings.get("line_number") == "relative"
+    assert settings.get("relative_line_numbers") == "enabled"
     assert settings.get("tab_size") == 4
     assert settings.get("hard_tabs") is False
     assert settings.get("diff_view_style") == "split"

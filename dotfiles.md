@@ -9,8 +9,8 @@ credentials, sessions, caches or task logs into Git.
 Install Git and Python 3 first. Use HTTPS, or SSH once GitHub SSH access works:
 
 ```sh
-git clone https://github.com/nurulislamz/dotfiles.git ~/vsvimsettings
-cd ~/vsvimsettings
+git clone https://github.com/nurulislamz/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 ```
 
 Keep this directory: installed configs and commands are symlinks into it.
@@ -51,7 +51,7 @@ WebGpu; if graphics fail, diagnose that setting on the target machine.
 Install Homebrew, then:
 
 ```sh
-brew bundle --file=~/vsvimsettings/Brewfile
+brew bundle --file=~/dotfiles/Brewfile
 brew install zsh
 ```
 
@@ -106,7 +106,7 @@ For Linux, Surface Linux and WSL, after installing the package prerequisites:
 
 ```sh
 sudo apt install curl git python3 tmux bubblewrap
-bash ~/vsvimsettings/scripts/setup-agents.sh
+bash ~/dotfiles/scripts/setup-agents.sh
 ```
 
 The script installs missing Antigravity, Codex, Oh My Pi (`omp`) and Cursor Agent
@@ -163,7 +163,7 @@ Only missing CLIs are downloaded; installed versions are retained.
 ## 5. Restore links, hooks and plugins
 
 ```sh
-~/vsvimsettings/scripts/bootstrap
+~/dotfiles/scripts/bootstrap
 ```
 
 Bootstrap runs Brewfile installation when `brew` exists, restores links/hooks,
@@ -171,7 +171,7 @@ restores Neovim's locked plugins, and attempts tmux plugin installation.
 On Linux with Homebrew installed, avoid its macOS casks: run these steps manually:
 
 ```sh
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 nvim --headless '+Lazy! restore' +qa
 ```
 
@@ -179,7 +179,7 @@ Then open tmux and install TPM plugins with prefix + I. Rerun the installer
 after tmux plugins exist so the tracked tmux-which-key config is linked too:
 
 ```sh
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 ```
 
 The installer clones oh-my-tmux if missing. Network access is needed for that,
@@ -210,7 +210,7 @@ its own setup; authentication and machine trust are not transferred.
 Run only when requested by the user; this command executes test checks:
 
 ```sh
-~/vsvimsettings/scripts/verify
+~/dotfiles/test/run.sh
 ```
 
 Manually open zsh, Neovim, tmux and WezTerm. Check fonts, clipboard, language
@@ -220,6 +220,6 @@ Ctrl+A as a prefix/leader; check nested key handling on the target machine.
 `scripts/regression-check.sh` targets the original WSL host, not a fresh machine.
 
 For later sync, inspect local changes, pull without overwriting them, then run
-`python3 ~/vsvimsettings/scripts/install.py` again. Read `README.md` and installer
+`python3 ~/dotfiles/scripts/install.py` again. Read `README.md` and installer
 source if this guide and checkout differ; do not silently replace machine-local
 settings or credentials.

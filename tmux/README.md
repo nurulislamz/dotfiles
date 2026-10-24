@@ -19,7 +19,46 @@ Based on [oh-my-tmux](https://github.com/gpakosz/.tmux). All personal tweaks liv
 Links only:
 
 ```sh
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 ```
 
 Needs a Nerd/Powerline font for the rounded tab glyphs (JetBrains Mono Nerd works).
+
+## Windows clipboard
+
+WezTerm routes Ctrl+V to tmux when the process, shell marker, or terminal title
+identifies tmux. In copy mode, tmux cancels the selection before it pastes from
+the Windows clipboard through `tmux/clip.sh`.
+
+The helper ignores empty and whitespace-only copies, so blank mouse selections
+cannot replace a copied Chrome URL. PowerShell writes clipboard text without
+an added newline and preserves Unicode. A failed read stops before tmux can
+paste a stale buffer. The helper requires Windows `clip.exe` and `powershell.exe`.
+
+Run the regression on an unlocked Windows desktop with Chrome installed and
+WezTerm attached to tmux using the standard tmux window title:
+
+```sh
+~/dotfiles/tmux/clip_test.sh
+```
+
+The test opens temporary Chrome and tmux windows and briefly takes focus.
+It navigates to a test URL, copies Chrome's address with Ctrl+C, and sends Ctrl+V
+to WezTerm in normal, vi, and emacs modes. It checks the exact pasted bytes and
+that each paste leaves the Windows clipboard sequence number unchanged.
+It also checks that a blank selection preserves the copied URL.
+The test closes its windows and restores the previous tmux window.
+The test URL remains in the clipboard.
+
+`tmux/test_clipboard.py` checks blank selections, Unicode, trailing newlines,
+and failed reads without touching the real clipboard. `test/run.sh` runs the
+portable tmux check plus `tmux/test_clipboard.py`. On this WSL host it also
+runs `test/live/clip_test.sh` (WezTerm keys + Chrome keyboard test).
+
+## Task logging removed
+
+Session task files, the `tmux-tasklog` helper, the tmux session-creation hook,
+and the Workmux `post_create` task hook are retired. Prefix+t and Prefix+.
+are unbound. The shell no longer exports `TASK_FILE`, and the shared agent
+rules no longer require task-file tracking. Existing task notes remain on disk.
+Workmux agent status hooks remain active.
