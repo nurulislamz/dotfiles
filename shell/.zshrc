@@ -19,7 +19,7 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 # User configuration & PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-# Vi-style line editing
+# Vi-style line editing: KEYTIMEOUT=1 (10ms) eliminates the lag switching from insert to normal mode on Escape.
 bindkey -v
 export KEYTIMEOUT=1
 
@@ -45,7 +45,7 @@ bindkey '^N' history-beginning-search-forward
 bindkey -M vicmd '^P' history-beginning-search-backward
 bindkey -M vicmd '^N' history-beginning-search-forward
 
-# Word ops on Ctrl
+# Word navigation and deletion on Ctrl (maps ^H, extkeys, and \e^? so Ctrl+Backspace/Delete work consistently).
 for keymap in emacs viins; do
   bindkey -M $keymap '^H'     backward-kill-word
   bindkey -M $keymap '\e^?'   backward-kill-word

@@ -373,7 +373,8 @@ tmux_conf_theme_clock_style="24"
 #   - false (default)
 #   - disabled
 # on Linux, this requires xsel, xclip or wl-copy
-tmux_conf_copy_to_os_clipboard=false
+# sync yanks to system clipboard across platforms
+tmux_conf_copy_to_os_clipboard=true
 
 
 # -- urlscan -------------------------------------------------------------------
@@ -409,17 +410,28 @@ unbind -q C-a #!important
 set -g prefix C-b #!important
 bind C-b send-prefix #!important
 
+# Agent TUIs enable modifyOtherKeys / CSI-u via passthrough. Treat those
+# encodings as prefix so Ctrl+B still works in any pane.
+set -s user-keys[0] "\e[98;5u" #!important
+set -s user-keys[1] "\e[27;5;98~" #!important
+set -s user-keys[2] "\e[98;5:1u" #!important
+set -s user-keys[3] "\e[98;5:3u" #!important
+bind -n User0 switch-client -T prefix #!important
+bind -n User1 switch-client -T prefix #!important
+bind -n User2 switch-client -T prefix #!important
+bind -n User3 switch-client -T prefix #!important
+unbind -T copy-mode C-b #!important
+unbind -T copy-mode-vi C-b #!important
+bind -T copy-mode C-b switch-client -T prefix #!important
+bind -T copy-mode-vi C-b switch-client -T prefix #!important
+
 # if you don't want Oh my tmux! to alter a binding or a setting, use #!important
 # bind c new-window -c '#{pane_current_path}' #!important
 
-# pass Shift-Enter through to terminal apps that use it for multiline input
-%if #{>=:#{version},3.5}
-set -g extended-keys always #!important
-%elif #{>=:#{version},3.2}
-set -g extended-keys on #!important
-%endif
+# Extended keys make WezTerm send Ctrl+B as ;5;98~ so tmux never sees prefix.
+# Shift+Enter still works: WezTerm sends the CSI-u bytes itself.
+set -s extended-keys off #!important
 %if #{>=:#{version},3.2}
-set -as terminal-features ',xterm*:extkeys,tmux*:extkeys,screen*:extkeys,alacritty*:extkeys,kitty*:extkeys,wezterm*:extkeys,ghostty*:extkeys' #!important
 # Windows Terminal / Cursor send CSI-u for Shift+Enter. Do not `send-keys S-Enter`:
 # tmux treats that as the literal text "S-Enter" in agent TUIs.
 bind -n S-Enter send-keys Escape "[13;2u" #!important
@@ -474,9 +486,21 @@ bind -T copy-mode-vi C-d send-keys -X halfpage-down
 bind -T copy-mode C-u send-keys -X halfpage-up
 bind -T copy-mode C-d send-keys -X halfpage-down
 
-# Ctrl+C in copy-mode copies selection via OSC 52
-bind -T copy-mode-vi C-c send-keys -X copy-selection-and-cancel #!important
-bind -T copy-mode C-c send-keys -X copy-selection-and-cancel #!important
+# Copy selection to OS clipboard: clip.exe on WSL, pbcopy on macOS, wl-copy/xsel on Linux.
+# OSC 52 alone fails in WezTerm on Windows/WSL; explicit pipe ensures system clipboard sync.
+bind -T copy-mode-vi C-c send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+bind -T copy-mode C-c send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+bind -T copy-mode y send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+bind -T copy-mode Enter send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+
+# Paste OS clipboard into tmux: syncs tmux buffer from OS clipboard before pasting.
+# wl-paste mirrors Windows clipboard on WSLg; pbpaste on macOS; fallback to paste-buffer.
+bind ] run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p' #!important
+bind -T root MouseDown2Pane select-pane -t = \; if-shell -F "#{||:#{pane_in_mode},#{mouse_any_flag}}" { send-keys -M } { run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p' } #!important
+# Right-click pastes OS clipboard in normal panes (like Windows Terminal); Alt+Right-click retains menu.
+bind -T root MouseDown3Pane if-shell -F -t = "#{||:#{mouse_any_flag},#{pane_in_mode}}" "send-keys -M" "run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p'" #!important
 
 # display a message after toggling mouse support
 bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?#{mouse},on,off}'
@@ -571,6 +595,41 @@ bind-key -n M-d last-window #!important
 # Alt + h / l to navigate backwards / forwards between windows
 bind-key -n M-h previous-window #!important
 bind-key -n M-l next-window #!important
+
+# Alt+x / Alt+1-9 / Alt+0 = prefix x / 1-9 / 0 (works in agent panes; no Ctrl+B)
+bind -n M-x kill-pane #!important
+bind -n M-1 select-window -t :=1 #!important
+bind -n M-2 select-window -t :=2 #!important
+bind -n M-3 select-window -t :=3 #!important
+bind -n M-4 select-window -t :=4 #!important
+bind -n M-5 select-window -t :=5 #!important
+bind -n M-6 select-window -t :=6 #!important
+bind -n M-7 select-window -t :=7 #!important
+bind -n M-8 select-window -t :=8 #!important
+bind -n M-9 select-window -t :=9 #!important
+bind -n M-0 select-window -t :=10 #!important
+bind -T copy-mode M-x kill-pane #!important
+bind -T copy-mode-vi M-x kill-pane #!important
+bind -T copy-mode M-1 select-window -t :=1 #!important
+bind -T copy-mode M-2 select-window -t :=2 #!important
+bind -T copy-mode M-3 select-window -t :=3 #!important
+bind -T copy-mode M-4 select-window -t :=4 #!important
+bind -T copy-mode M-5 select-window -t :=5 #!important
+bind -T copy-mode M-6 select-window -t :=6 #!important
+bind -T copy-mode M-7 select-window -t :=7 #!important
+bind -T copy-mode M-8 select-window -t :=8 #!important
+bind -T copy-mode M-9 select-window -t :=9 #!important
+bind -T copy-mode M-0 select-window -t :=10 #!important
+bind -T copy-mode-vi M-1 select-window -t :=1 #!important
+bind -T copy-mode-vi M-2 select-window -t :=2 #!important
+bind -T copy-mode-vi M-3 select-window -t :=3 #!important
+bind -T copy-mode-vi M-4 select-window -t :=4 #!important
+bind -T copy-mode-vi M-5 select-window -t :=5 #!important
+bind -T copy-mode-vi M-6 select-window -t :=6 #!important
+bind -T copy-mode-vi M-7 select-window -t :=7 #!important
+bind -T copy-mode-vi M-8 select-window -t :=8 #!important
+bind -T copy-mode-vi M-9 select-window -t :=9 #!important
+bind -T copy-mode-vi M-0 select-window -t :=10 #!important
 
 
 # -- custom variables ----------------------------------------------------------

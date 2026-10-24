@@ -88,15 +88,65 @@ end)
 -- Keybindings
 local act = wezterm.action
 
+-- Mouse bindings: Ctrl-click opens links; Right-click pastes from OS clipboard
+config.mouse_bindings = config.mouse_bindings or {}
+for _, reporting in ipairs({ false, true }) do
+    table.insert(config.mouse_bindings, {
+        event = { Down = { streak = 1, button = "Left" } },
+        mods = "CTRL",
+        mouse_reporting = reporting,
+        action = act.Nop,
+    })
+    table.insert(config.mouse_bindings, {
+        event = { Up = { streak = 1, button = "Left" } },
+        mods = "CTRL",
+        mouse_reporting = reporting,
+        action = act.OpenLinkAtMouseCursor,
+    })
+end
+
+-- Plain right-click pastes when terminal app does not capture mouse
+table.insert(config.mouse_bindings, {
+    event = { Down = { streak = 1, button = "Right" } },
+    mods = "NONE",
+    mouse_reporting = false,
+    action = act.PasteFrom("Clipboard"),
+})
+-- Shift+Right-click forces paste even inside mouse-capturing apps like tmux
+table.insert(config.mouse_bindings, {
+    event = { Down = { streak = 1, button = "Right" } },
+    mods = "SHIFT",
+    mouse_reporting = true,
+    action = act.PasteFrom("Clipboard"),
+})
+table.insert(config.mouse_bindings, {
+    event = { Down = { streak = 1, button = "Right" } },
+    mods = "SHIFT",
+    mouse_reporting = false,
+    action = act.PasteFrom("Clipboard"),
+})
+
 config.keys = {
     { key = "v", mods = "CTRL|SHIFT", action = act.PasteFrom("Clipboard") },
     { key = "Insert", mods = "SHIFT", action = act.PasteFrom("Clipboard") },
-    -- Shift+Enter: send CSI u sequence (\x1b[13;2u) for newline in agy, TUIs, and shells
+    -- Shift+Enter: send CSI-u sequence (\x1b[13;2u) for newline in agy, TUIs, and shells
     { key = "Enter", mods = "SHIFT", action = act.SendString("\x1b[13;2u") },
     { key = "CapsLock", action = act.SendKey({ key = "Escape" }) },
+    -- Agent TUIs enable modifyOtherKeys; send raw \x02 so tmux prefix always registers
+    { key = "b", mods = "CTRL", action = act.SendString("\x02") },
+    { key = "B", mods = "CTRL", action = act.SendString("\x02") },
 }
 
--- macOS keeps default Cmd+C/Cmd+V, so Ctrl+C/Ctrl+V reach the shell and Neovim.
+-- Pass Alt+x / Alt+0-9 through so tmux root binds can run in agent panes without prefix
+for _, key in ipairs({ "x", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }) do
+    table.insert(config.keys, {
+        key = key,
+        mods = "ALT",
+        action = act.SendKey({ key = key, mods = "ALT" }),
+    })
+end
+
+-- macOS keeps default Cmd+C/Cmd+V; on Windows/Linux map Ctrl+C (smart copy/SIGINT) and Ctrl+V (paste)
 if host_os ~= "macos" then
     table.insert(config.keys, { key = "v", mods = "CTRL", action = act.PasteFrom("Clipboard") })
     table.insert(config.keys, {
@@ -174,5 +224,10 @@ wezterm_replay.apply_to_config(config)
 
 local cmdpicker = wezterm.plugin.require("https://github.com/abidibo/wezterm-cmdpicker")
 cmdpicker.apply_to_config(config, { title = "Command Palette" })
+
+-- Disable enhanced keyboard protocols so WezTerm sends standard ASCII control codes (preserves Ctrl+B prefix).
+config.allow_win32_input_mode = false
+config.enable_csi_u_key_encoding = false
+config.enable_kitty_keyboard = false
 
 return config

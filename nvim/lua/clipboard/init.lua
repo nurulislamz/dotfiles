@@ -41,6 +41,7 @@ local function search_paste_buffer()
 end
 
 function M.setup()
+    -- Empty clipboard keeps deletions/edits inside Vim registers without polluting the OS clipboard.
     vim.opt.clipboard = ""
 
     local yank_sync_group = vim.api.nvim_create_augroup("YankClipboardSync", { clear = true })
@@ -48,6 +49,7 @@ function M.setup()
         group = yank_sync_group,
         desc = "Sync yanks to system clipboard and tmux buffer",
         callback = function()
+            -- Only explicit yanks (not deletes or changes) sync to system clipboard and tmux buffer.
             if vim.v.event.operator == "y" then
                 pcall(vim.fn.setreg, "+", vim.fn.getreg('"'), vim.fn.getregtype('"'))
                 if vim.env.TMUX ~= nil then
@@ -62,14 +64,18 @@ function M.setup()
 
     local map = vim.keymap.set
 
+    -- Always paste from system register '+' so external copies and internal yanks work identically.
     map("n", "p", '"+p', { desc = "Paste clipboard after cursor" })
     map("n", "P", '"+P', { desc = "Paste clipboard before cursor" })
+    -- Overwrite visual selection without replacing clipboard with deleted text.
     map("x", "p", '"_d"+P', { desc = "Paste clipboard over selection (keep clipboard)" })
     map("x", "P", '"_d"+P', { desc = "Paste clipboard over selection (keep clipboard)" })
     map("v", "<C-c>", '"+y', { desc = "Copy selection to clipboard" })
 
+    -- Black-hole single char deletes so they do not overwrite yank register.
     map("n", "x", '"_x', { desc = "Delete char to black hole" })
     map("n", "X", '"_X', { desc = "Backspace char to black hole" })
+    -- Blank-line dd goes to black hole; non-blank goes to '+' clipboard.
     map("n", "dd", function()
         if vim.api.nvim_get_current_line():match("^%s*$") then
             return '"_dd'
