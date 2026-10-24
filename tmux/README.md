@@ -19,7 +19,7 @@ Based on [oh-my-tmux](https://github.com/gpakosz/.tmux). All personal tweaks liv
 Links only:
 
 ```sh
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 ```
 
 Needs a Nerd/Powerline font for the rounded tab glyphs (JetBrains Mono Nerd works).
@@ -51,8 +51,9 @@ The test closes its windows and restores the previous tmux window.
 The test URL remains in the clipboard.
 
 `tmux/test_clipboard.py` checks blank selections, Unicode, trailing newlines,
-and failed reads without touching the real clipboard. `tmux/check.sh` runs
-these checks and the Chrome keyboard test.
+and failed reads without touching the real clipboard. `test/run.sh` runs the
+portable tmux check plus `tmux/test_clipboard.py`. On this WSL host it also
+runs `test/live/clip_test.sh` (WezTerm keys + Chrome keyboard test).
 
 ## Task logging removed
 

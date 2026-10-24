@@ -36,10 +36,10 @@ if [[ "$(readlink -f "$HOME/.tmux.conf" 2>/dev/null)" == *tmux-omt* ]]; then
 else
   fail '~/.tmux.conf is not the oh-my-tmux symlink'
 fi
-if [[ "$(readlink -f "$HOME/.tmux.conf.local" 2>/dev/null)" == *vsvimsettings/tmux/.tmux.conf.local ]]; then
-  ok '~/.tmux.conf.local -> vsvimsettings'
+if [[ "$(readlink -f "$HOME/.tmux.conf.local" 2>/dev/null)" == *dotfiles/tmux/.tmux.conf.local ]]; then
+  ok '~/.tmux.conf.local -> dotfiles'
 else
-  fail '~/.tmux.conf.local is not the vsvimsettings symlink'
+  fail '~/.tmux.conf.local is not the dotfiles symlink'
 fi
 if tmux show -g @continuum-restore 2>/dev/null | grep -q "on"; then
   ok 'continuum-restore on'
@@ -52,8 +52,8 @@ if [[ -z "$plugin_extra" ]]; then
 else
   fail "unexpected tmux plugins: $plugin_extra"
 fi
-if grep -q 'set -gu prefix2' "$HOME/vsvimsettings/tmux/.tmux.conf.local" 2>/dev/null \
-  || grep -q 'set -gu prefix2' /home/nurul/vsvimsettings/tmux/.tmux.conf.local; then
+if grep -q 'set -gu prefix2' "$HOME/dotfiles/tmux/.tmux.conf.local" 2>/dev/null \
+  || grep -q 'set -gu prefix2' /home/nurul/dotfiles/tmux/.tmux.conf.local; then
   ok 'local config unsets prefix2'
 else
   fail 'tmux/.tmux.conf.local missing prefix2 unset'
@@ -77,10 +77,10 @@ fi
 echo
 echo '======== NVIM ========'
 need_cmd nvim
-if [[ "$(readlink -f "$HOME/.config/nvim" 2>/dev/null)" == *vsvimsettings/nvim ]]; then
-  ok '~/.config/nvim -> vsvimsettings/nvim'
+if [[ "$(readlink -f "$HOME/.config/nvim" 2>/dev/null)" == *dotfiles/nvim ]]; then
+  ok '~/.config/nvim -> dotfiles/nvim'
 else
-  fail '~/.config/nvim is not the vsvimsettings symlink'
+  fail '~/.config/nvim is not the dotfiles symlink'
 fi
 if nvim --headless -c 'lua print("nvim-boot-ok")' -c qa 2>&1 | grep -q 'nvim-boot-ok'; then
   ok 'nvim headless boots'
@@ -93,7 +93,7 @@ while IFS= read -r -d '' f; do
     fail "lua parse failed: $f"
     lua_bad=1
   fi
-done < <(find /home/nurul/vsvimsettings/nvim -name '*.lua' -print0)
+done < <(find /home/nurul/dotfiles/nvim -name '*.lua' -print0)
 if [[ "$lua_bad" -eq 0 ]]; then
   ok 'all nvim lua files parse'
 fi
