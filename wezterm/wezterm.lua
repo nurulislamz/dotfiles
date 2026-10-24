@@ -207,6 +207,12 @@ config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 
 local resurrect = wezterm.plugin.require("https://github.com/StephenGemin/resurrect.wezterm")
 resurrect.setup(config, { status_bar = false })
+-- Drop resurrect's Alt+d (fuzzy delete) so tmux M-d last-window receives it.
+for i = #config.keys, 1, -1 do
+    if config.keys[i].key == "d" and config.keys[i].mods == "ALT" then
+        table.remove(config.keys, i)
+    end
+end
 
 local modal = wezterm.plugin.require("https://github.com/MLFlexer/modal.wezterm")
 modal.apply_to_config(config)

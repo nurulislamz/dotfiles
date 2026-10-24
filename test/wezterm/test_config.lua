@@ -48,7 +48,9 @@ local function load_config(triple)
             plugin = {
                 require = function()
                     return {
-                        setup = function() end,
+                        setup = function(cfg)
+                            table.insert(cfg.keys, { key = "d", mods = "ALT" })
+                        end,
                         apply_to_config = function() end,
                         set_default_keys = function() end,
                     }
@@ -129,6 +131,12 @@ for _, triple in ipairs({
         count_keys(cfg, function(item)
             return item.key == "c" and item.mods == "CTRL" and action_kind(item, "EmitEvent", "copy-or-interrupt")
         end) == 1
+    )
+    check(
+        tag .. " alt-d reaches tmux",
+        count_keys(cfg, function(item)
+            return item.key == "d" and item.mods == "ALT"
+        end) == 0
     )
     if tag == "linux" then
         check("linux default_prog zsh", type(cfg.default_prog) == "table" and cfg.default_prog[1] == "zsh")
