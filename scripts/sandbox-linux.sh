@@ -29,12 +29,6 @@ assert (home / ".local/bin/sesh-switch").resolve() == root / "tmux/sesh-switch.s
 print("ok: sandbox links")
 PY
 
-python3 -m unittest discover -s "$ROOT/scripts" -p 'test_*.py'
-
-if command -v tmux >/dev/null 2>&1; then
-  "$ROOT/tmux/check.sh"
-else
-  echo "skip: tmux not installed"
-fi
+"$ROOT/test/run.sh"
 
 echo "sandbox-linux passed"

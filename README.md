@@ -1,17 +1,17 @@
 # Personal dotfiles
 
-`vsvimsettings` is the source of truth for Neovim, Foot, WezTerm, zsh, tmux
+`dotfiles` is the source of truth for Neovim, Foot, WezTerm, zsh, tmux
 customizations, shared agent instructions, the workmux skill, lifecycle hooks
 and box launchers. Installed paths point here; edit and commit files in this
 repo.
 
 ## Restore
 
-Clone this repo (any location works), then on a Mac with Homebrew:
+Clone this repo to `~/dotfiles`. On a Mac with Homebrew, run:
 
 ```sh
-git clone git@github.com:nurulislamz/dotfiles.git ~/vsvimsettings
-~/vsvimsettings/scripts/bootstrap
+git clone git@github.com:nurulislamz/dotfiles.git ~/dotfiles
+~/dotfiles/scripts/bootstrap
 ```
 
 `bootstrap` runs `brew bundle` from `Brewfile`, then `scripts/install.py`, then
@@ -19,7 +19,7 @@ restores Neovim plugins from `lazy-lock.json` and installs tmux plugins.
 Packages already present? Links only:
 
 ```sh
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 ```
 
 The installer links Neovim, Foot, WezTerm, `.zshrc`, tmux's local config, oh-my-tmux
@@ -41,7 +41,7 @@ on PATH:
 
 ```sh
 install -Dm755 "$(command -v workmux)" ~/.local/libexec/workmux
-python3 ~/vsvimsettings/scripts/install.py
+python3 ~/dotfiles/scripts/install.py
 ```
 
 The wrapper provides grouped dashboards and routes lifecycle events through the
@@ -60,7 +60,7 @@ Ghostty and IdeaVim stay stored; the installer does not apply them.
 Install `curl`, `git`, `python3`, `tmux` and distro `bubblewrap`, then:
 
 ```sh
-bash ~/vsvimsettings/scripts/setup-agents.sh
+bash ~/dotfiles/scripts/setup-agents.sh
 ```
 
 Installs missing AGY/Codex/OMP/Cursor CLIs, restores dotfiles, and recreates the
@@ -87,13 +87,13 @@ git commit -m 'Restore Neovim configuration'
 ## Check
 
 ```sh
-~/vsvimsettings/scripts/verify
+~/dotfiles/test/run.sh
 ```
 
 Empty-HOME Linux smoke (links + tmux load, no plugin downloads):
 
 ```sh
-~/vsvimsettings/scripts/sandbox-linux.sh
+~/dotfiles/scripts/sandbox-linux.sh
 ```
 
 `scripts/regression-check.sh` is a live WSL host audit, not the portable installer test.
