@@ -486,21 +486,24 @@ bind -T copy-mode-vi C-d send-keys -X halfpage-down
 bind -T copy-mode C-u send-keys -X halfpage-up
 bind -T copy-mode C-d send-keys -X halfpage-down
 
-# Copy selection to OS clipboard: clip.exe on WSL, pbcopy on macOS, wl-copy/xsel on Linux.
-# OSC 52 alone fails in WezTerm on Windows/WSL; explicit pipe ensures system clipboard sync.
-bind -T copy-mode-vi C-c send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
-bind -T copy-mode C-c send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
-bind -T copy-mode y send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
-bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
-bind -T copy-mode Enter send-keys -X copy-pipe-and-cancel 'if command -v clip.exe >/dev/null 2>&1; then clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; else cat; fi' #!important
+# Use the Windows clipboard; blank mouse selections must not replace a copied URL.
+bind -T copy-mode-vi C-c send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode C-c send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode y send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode Enter send-keys -X copy-pipe-and-cancel "$HOME/dotfiles/tmux/clip.sh copy" #!important
+# Stay in copy-mode after mouse select so Ctrl+C copies instead of SIGINT.
+bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe "$HOME/dotfiles/tmux/clip.sh copy" #!important
+bind -T copy-mode MouseDragEnd1Pane send-keys -X copy-pipe "$HOME/dotfiles/tmux/clip.sh copy" #!important
 
-# Paste OS clipboard into tmux: syncs tmux buffer from OS clipboard before pasting.
-# wl-paste mirrors Windows clipboard on WSLg; pbpaste on macOS; fallback to paste-buffer.
-bind ] run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p' #!important
-bind -T root MouseDown2Pane select-pane -t = \; if-shell -F "#{||:#{pane_in_mode},#{mouse_any_flag}}" { send-keys -M } { run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p' } #!important
-# Right-click pastes OS clipboard in normal panes (like Windows Terminal); Alt+Right-click retains menu.
-bind -T root MouseDown3Pane if-shell -F -t = "#{||:#{mouse_any_flag},#{pane_in_mode}}" "send-keys -M" "run-shell -b 'if command -v wl-paste >/dev/null 2>&1; then wl-paste --no-newline | tmux load-buffer -; elif command -v pbpaste >/dev/null 2>&1; then pbpaste | tmux load-buffer -; fi; tmux paste-buffer -p'" #!important
+bind -n C-v run-shell "$HOME/dotfiles/tmux/clip.sh paste-tmux" #!important
+bind -T copy-mode-vi C-v send-keys -X cancel \; run-shell "$HOME/dotfiles/tmux/clip.sh paste-tmux" #!important
+bind -T copy-mode C-v send-keys -X cancel \; run-shell "$HOME/dotfiles/tmux/clip.sh paste-tmux" #!important
+bind ] run-shell "$HOME/dotfiles/tmux/clip.sh paste-tmux" #!important
+bind -T root MouseDown2Pane select-pane -t = \; if-shell -F "#{||:#{pane_in_mode},#{mouse_any_flag}}" "send-keys -M" "run-shell '$HOME/dotfiles/tmux/clip.sh paste-tmux'" #!important
+# Right-click pastes OS clipboard in normal panes; Alt+Right-click retains menu.
+bind -T root MouseDown3Pane if-shell -F -t = "#{||:#{mouse_any_flag},#{pane_in_mode}}" "send-keys -M" "run-shell '$HOME/dotfiles/tmux/clip.sh paste-tmux'" #!important
 
 # display a message after toggling mouse support
 bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?#{mouse},on,off}'

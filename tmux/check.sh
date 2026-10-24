@@ -75,4 +75,5 @@ fi
 got=$(awk -F"'" '/^set -g @plugin /{n=$2; sub(".*/","",n); print n}' "$HOME/.tmux.conf.local" | paste -sd' ' -)
 check "plugin list" "tmux-resurrect tmux-fzf tmux-sessionx tmux-which-key tmux-smooth-scroll tmux-continuum tmux-assistant-resurrect" "$got"
 check "sesh-switch bind" 1 "$(tmux -L $SOCK list-keys -T prefix | grep -c sesh-switch)"
+"$HOME/dotfiles/tmux/clip_test.sh"
 echo "all checks passed"

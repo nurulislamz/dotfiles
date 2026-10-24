@@ -147,20 +147,21 @@ for _, key in ipairs({ "x", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }) 
 end
 
 -- macOS keeps default Cmd+C/Cmd+V; on Windows/Linux map Ctrl+C (smart copy/SIGINT) and Ctrl+V (paste)
+wezterm.on("copy-or-interrupt", function(window, pane)
+    local sel = window:get_selection_text_for_pane(pane)
+    if sel and sel ~= "" then
+        window:perform_action(act.CopyTo("ClipboardAndPrimarySelection"), pane)
+        window:perform_action(act.ClearSelection, pane)
+    else
+        window:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), pane)
+    end
+end)
+-- Ctrl+C copies a WezTerm selection (Shift+drag); otherwise SIGINT / tmux yank.
 if host_os ~= "macos" then
-    table.insert(config.keys, { key = "v", mods = "CTRL", action = act.PasteFrom("Clipboard") })
     table.insert(config.keys, {
         key = "c",
         mods = "CTRL",
-        action = wezterm.action_callback(function(window, pane)
-            local sel = window:get_selection_text_for_pane(pane)
-            if sel and sel ~= "" then
-                window:perform_action(act.CopyTo("ClipboardAndPrimarySelection"), pane)
-                window:perform_action(act.ClearSelection, pane)
-            else
-                window:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), pane)
-            end
-        end),
+        action = wezterm.action.EmitEvent("copy-or-interrupt"),
     })
 end
 
@@ -229,5 +230,35 @@ cmdpicker.apply_to_config(config, { title = "Command Palette" })
 config.allow_win32_input_mode = false
 config.enable_csi_u_key_encoding = false
 config.enable_kitty_keyboard = false
+
+-- After plugins: default CTRL+V is PasteFrom. Bare WezTerm needs that.
+-- Inside tmux, send raw C-v so clip.sh paste-tmux runs (same idea as Ctrl+B).
+wezterm.on("paste-or-send", function(window, pane)
+    local name = pane:get_foreground_process_name() or ""
+    local title = pane:get_title() or ""
+    local vars = pane:get_user_vars()
+    local is_tmux = name:find("tmux")
+        or (vars and vars.WEZTERM_IN_TMUX == "1")
+        or title:find("❐")
+        or title:find("●")
+        or title:find("tmux")
+    if is_tmux then
+        window:perform_action(act.SendString("\x16"), pane)
+    else
+        window:perform_action(act.PasteFrom("Clipboard"), pane)
+    end
+end)
+if host_os ~= "macos" then
+    table.insert(config.keys, {
+        key = "v",
+        mods = "CTRL",
+        action = wezterm.action.EmitEvent("paste-or-send"),
+    })
+    table.insert(config.keys, {
+        key = "V",
+        mods = "CTRL",
+        action = wezterm.action.EmitEvent("paste-or-send"),
+    })
+end
 
 return config
