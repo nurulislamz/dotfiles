@@ -235,8 +235,9 @@ return {
   {
     "abecodes/tabout.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter", "L3MON4D3/LuaSnip" },
-    event = "InsertCharPre",
-    opts = { tabkey = "", backwards_tabkey = "" },
+    -- load before the first <Tab>; tabout maps <Tab> only once loaded
+    event = "InsertEnter",
+    opts = { tabkey = "<Tab>", backwards_tabkey = "" },
   },
   {
     "stevearc/quicker.nvim",
