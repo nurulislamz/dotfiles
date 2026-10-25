@@ -47,6 +47,27 @@ class ClipboardTests(unittest.TestCase):
         self.assertEqual(self.run_clip('paste').stdout, before)
         self.assertEqual(self.clipboard.read_bytes(), before)
 
+    def test_separator_line_pastes_as_phrase_not_one_character(self):
+        # Chrome's plain-text copy of an inline "Roadmap / Frontend Beginner"
+        # breadcrumb. The slash is its own element, so the clipboard is three
+        # lines. tmux paste-buffer turns the line breaks into carriage returns,
+        # and the shell then executes "/" by itself.
+        for raw in (
+            b'Roadmap\n/\nFrontend Beginner',
+            b'Roadmap\r\n/\r\nFrontend Beginner',
+        ):
+            self.clipboard.write_bytes(raw)
+            pasted = self.run_clip('paste')
+            self.assertEqual(pasted.returncode, 0)
+            self.assertEqual(pasted.stdout, b'Roadmap/Frontend Beginner')
+            self.assertNotIn(b'\n/\n', pasted.stdout)
+            self.assertNotIn(b'\r/\r', pasted.stdout)
+
+    def test_multiline_paste_keeps_real_lines(self):
+        code = b'line1\nline2\n'
+        self.clipboard.write_bytes(code)
+        self.assertEqual(self.run_clip('paste').stdout, code)
+
     def test_failed_read_does_not_paste_stale_tmux_buffer(self):
         self.env['FAIL_READ'] = '1'
         self.assertNotEqual(self.run_clip('paste-tmux').returncode, 0)

@@ -35,6 +35,13 @@ cannot replace a copied Chrome URL. PowerShell writes clipboard text without
 an added newline and preserves Unicode. A failed read stops before tmux can
 paste a stale buffer. The helper requires Windows `clip.exe` and `powershell.exe`.
 
+A Chrome plain-text copy of inline text such as `Roadmap / Frontend Beginner`
+can arrive as `Roadmap`, a line containing only `/`, then `Frontend Beginner`,
+because the slash is its own element. `paste-buffer` would turn those breaks
+into carriage returns and the shell would execute `/`. `clip.sh paste` joins
+that separator line back into `Roadmap/Frontend Beginner`. Other multiline
+pastes keep their line breaks.
+
 Run the regression on an unlocked Windows desktop with Chrome installed and
 WezTerm attached to tmux using the standard tmux window title:
 
