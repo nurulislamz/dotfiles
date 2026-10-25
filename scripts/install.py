@@ -94,7 +94,7 @@ def install():
         ".config/zed/tasks.json": "zed/tasks.json",
     }
     for target in (
-        ".codex/AGENTS.md", ".claude/CLAUDE.md", ".claude/AGENTS.md", ".config/opencode/AGENTS.md",
+        ".codex/AGENTS.md", ".claude/CLAUDE.md", ".config/opencode/AGENTS.md",
         ".cursor/rules/session-tasks.md", ".gemini/config/rules/session-tasks.md",
     ):
         paths[target] = "agents/AGENTS.md"
