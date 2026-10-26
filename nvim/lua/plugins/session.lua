@@ -25,11 +25,45 @@ return {
           vim.notify("persistence: " .. tostring(err), vim.log.levels.WARN)
         end
       end
+      -- Retired workmux task logs. A saved session or ShaDa oldfile must not
+      -- reopen them, and VimLeave must not write them back into the session.
+      local function is_tasklog(path)
+        return path:find("/workmux/tasklogs/", 1, true) ~= nil
+          or path:find("/%.workmux/task%.md$") ~= nil
+      end
+      local function drop_tasklogs()
+        vim.v.oldfiles = vim.tbl_filter(function(f)
+          return not is_tasklog(f)
+        end, vim.v.oldfiles)
+        local cur = vim.api.nvim_buf_get_name(0)
+        if cur ~= "" and is_tasklog(cur) then
+          local replacement
+          for _, b in ipairs(vim.api.nvim_list_bufs()) do
+            local n = vim.api.nvim_buf_get_name(b)
+            if n ~= "" and not is_tasklog(n) and vim.bo[b].buftype == "" and vim.fn.filereadable(n) == 1 then
+              replacement = b
+              break
+            end
+          end
+          if replacement then
+            pcall(vim.api.nvim_set_current_buf, replacement)
+          else
+            vim.cmd("enew")
+          end
+        end
+        for _, b in ipairs(vim.api.nvim_list_bufs()) do
+          local n = vim.api.nvim_buf_get_name(b)
+          if n ~= "" and is_tasklog(n) then
+            pcall(vim.api.nvim_buf_delete, b, { force = true })
+          end
+        end
+      end
       -- Reopen the last workspace for this cwd when starting Neovim without args
       vim.api.nvim_create_autocmd("VimEnter", {
         group = vim.api.nvim_create_augroup("persistence_autoload", { clear = true }),
         nested = true,
         callback = function()
+          drop_tasklogs()
           if vim.fn.argc(-1) > 0 then
             return
           end
@@ -61,6 +95,7 @@ return {
               pcall(vim.api.nvim_buf_delete, b, { force = true })
             end
           end
+          drop_tasklogs()
           -- Land on the file you had open last. Session focus can be a plugin
           -- scratch buffer, and a stale session file must not win over your
           -- most recently opened file (ShaDa v:oldfiles).
@@ -108,6 +143,7 @@ return {
       vim.api.nvim_create_autocmd("User", {
         pattern = "PersistenceSavePre",
         callback = function()
+          drop_tasklogs()
           pcall(function()
             local snacks = package.loaded["snacks"]
             if snacks and snacks.picker then
