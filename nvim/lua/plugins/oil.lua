@@ -10,6 +10,7 @@ return {
       keymaps = {
         ["<C-h>"] = false,
         ["<C-v>"] = { "actions.select", opts = { horizontal = true } },
+        ["<C-s>"] = { "actions.select", opts = { vertical = true } },
         ["<S-CR>"] = { "actions.select", opts = { tab = true } },
       },
       view_options = {
