@@ -8,6 +8,7 @@ return {
       delete_to_trash = true,
       skip_confirm_for_simple_edits = true,
       keymaps = {
+        ["<C-h>"] = false,
         ["<S-CR>"] = { "actions.select", opts = { tab = true } },
       },
       view_options = {
