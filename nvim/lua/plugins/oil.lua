@@ -9,6 +9,7 @@ return {
       skip_confirm_for_simple_edits = true,
       keymaps = {
         ["<C-h>"] = false,
+        ["<C-v>"] = { "actions.select", opts = { horizontal = true } },
         ["<S-CR>"] = { "actions.select", opts = { tab = true } },
       },
       view_options = {
