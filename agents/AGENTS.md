@@ -39,7 +39,7 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 
 ## Dotfiles source
 
-The dotfiles repo is the source for these rules, the workmux skill, workmux config, Neovim, tmux, WezTerm and Zed. Find it with `dirname "$(readlink ~/.config/nvim)"`. Installed paths link there. Edit and commit the source; restore with `python3 <repo>/scripts/install.py`. Keep credentials, sessions, caches and task logs outside the repo.
+The dotfiles repo is the source for these rules, the workmux skill, workmux config, Neovim, tmux, WezTerm, Zed and herdr config. Find it with `dirname "$(readlink ~/.config/nvim)"`. Installed paths link there. Edit and commit the source; restore with `python3 <repo>/scripts/install.py`. Keep credentials, sessions, caches and task logs outside the repo.
 
 ## Worktrees
 

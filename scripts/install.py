@@ -92,6 +92,7 @@ def install():
         ".config/zed/settings.json": "zed/settings.json",
         ".config/zed/keymap.json": "zed/keymap.json",
         ".config/zed/tasks.json": "zed/tasks.json",
+        ".config/herdr/config.toml": "herdr/config.toml",
     }
     for target in (
         ".codex/AGENTS.md", ".claude/CLAUDE.md", ".config/opencode/AGENTS.md",
