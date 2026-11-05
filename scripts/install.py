@@ -109,6 +109,7 @@ def install():
         paths[f".local/bin/{source.name}"] = str(source.relative_to(ROOT))
     paths[".local/bin/cursor-box"] = "agents/bin/agent-box"
     paths[".local/bin/sesh-switch"] = "tmux/sesh-switch.sh"
+    paths[".local/bin/herdr-nav"] = "herdr/nav.sh"
     omt = ensure_oh_my_tmux(home)
     if omt is not None:
         link(omt / ".tmux.conf", home / ".tmux.conf", backup)

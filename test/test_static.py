@@ -121,7 +121,7 @@ class StaticTests(unittest.TestCase):
         self.assertIn('key = "v", mods = "CTRL|SHIFT"', text)
         self.assertIn('EmitEvent("copy-or-interrupt")', text)
         self.assertIn('SendString("\\x02")', text)
-        self.assertIn('leader = { key = "a", mods = "CTRL"', text)
+        self.assertIn('leader = { key = "F12", mods = "NONE"', text)
         self.assertIn('enable_csi_u_key_encoding = false', text)
         self.assertIn('enable_kitty_keyboard = false', text)
 

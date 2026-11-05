@@ -28,3 +28,27 @@ resize_pane_down = "prefix+shift+j"
 resize_pane_up = "prefix+shift+k"
 resize_pane_right = "prefix+shift+l"
 edit_scrollback = ["prefix+e", "prefix+["]
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
+navigate_pane_up = "ctrl+k"
+navigate_pane_down = "ctrl+j"
+
+[[keys.command]]
+key = "ctrl+h"
+type = "shell"
+command = "$HOME/.local/bin/herdr-nav left ctrl+h"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "shell"
+command = "$HOME/.local/bin/herdr-nav down ctrl+j"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "shell"
+command = "$HOME/.local/bin/herdr-nav up ctrl+k"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "shell"
+command = "$HOME/.local/bin/herdr-nav right ctrl+l"

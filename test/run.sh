@@ -30,6 +30,8 @@ else
   echo "skip: zsh"
 fi
 
+run "$TEST_DIR/shell/test_herdr_nav.sh" || true
+
 section "NVIM"
 if command -v nvim >/dev/null 2>&1 && [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy" ]; then
   run nvim --headless "+luafile $TEST_DIR/nvim/contract.lua" || true
