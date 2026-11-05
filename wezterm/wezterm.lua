@@ -203,7 +203,7 @@ config.quick_select_patterns = {
 }
 
 -- Plugins (leader required by replay + cmdpicker)
-config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
+config.leader = { key = "F12", mods = "NONE", timeout_milliseconds = 1000 }
 
 local resurrect = wezterm.plugin.require("https://github.com/StephenGemin/resurrect.wezterm")
 resurrect.setup(config, { status_bar = false })
