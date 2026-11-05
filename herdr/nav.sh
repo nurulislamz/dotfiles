@@ -17,5 +17,14 @@ printf '%s' "$info" | jq -r '.result.process_info.foreground_processes[].name' |
 if [ -n "$pass" ]; then
     "$herdr" pane send-keys "$pane" "$key"
 else
-    "$herdr" pane focus --current --direction "$direction"
+    moved=$("$herdr" pane focus --current --direction "$direction") || exit 1
+    # At the left edge, enter the sidebar. Herdr has no API for this, so press its keys through tmux.
+    # shortcut: needs herdr inside tmux and prefix ctrl+a, and skips if two herdr windows are visible; upgrade when herdr adds an API.
+    if [ "$direction" = left ] && [ "$(printf '%s' "$moved" | jq -r .result.focus.changed)" = false ]; then
+        target=$(tmux list-panes -a -F '#{window_active}#{?session_attached,1,0}#{pane_active} #{pane_current_command} #{pane_id}' 2>/dev/null |
+            awk '$1 == "111" && $2 == "herdr" { print $3 }')
+        if [ -n "$target" ] && [ "$(printf '%s\n' "$target" | wc -l)" -eq 1 ]; then
+            tmux send-keys -t "$target" C-a w
+        fi
+    fi
 fi
