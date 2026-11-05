@@ -4,6 +4,9 @@
 # ==============================================================================
 set -euo pipefail
 
+# The real binary is named agy-real, so tell herdr which agent this is.
+export HERDR_AGENT=agy
+
 REAL_AGY="${AGY_REAL_BIN:-$HOME/.local/bin/agy-real}"
 
 if [ ! -x "$REAL_AGY" ]; then
