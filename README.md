@@ -1,7 +1,7 @@
 # Personal dotfiles
 
 `dotfiles` is the source of truth for Neovim, Foot, WezTerm, zsh, tmux
-customizations, shared agent instructions, the workmux skill
+customizations, shared agent instructions
 and box launchers. Installed paths point here; edit and commit files in this
 repo.
 
@@ -23,32 +23,17 @@ python3 ~/dotfiles/scripts/install.py
 ```
 
 The installer links Neovim, Foot, WezTerm, `.zshrc`, tmux's local config, oh-my-tmux
-(`~/.tmux-omt` cloned if missing), workmux config, shared rules, skills and
+(`~/.tmux-omt` cloned if missing), shared rules, skills and
 helper commands. It removes agent hooks from host and box configs while
 preserving other settings. Replaced files and directories are preserved in
 `~/.local/state/vsvimsettings/backups/<timestamp>/`, with their original paths.
 Running it again leaves correct links and settings alone.
 
 Keep `~/.local/bin` on PATH. Authenticate agent CLIs separately. Agent hooks
-are disabled. Tmux naming runs once at session startup through `agents/AGENTS.md`.
-This repo does not copy credentials or machine trust.
+are disabled. This repo does not copy credentials or machine trust.
 
-Install the native workmux binary at `~/.local/libexec/workmux` **before** using
-this repo's `workmux` wrapper. On a fresh machine with a native workmux already
-on PATH:
-
-```sh
-install -Dm755 "$(command -v workmux)" ~/.local/libexec/workmux
-python3 ~/dotfiles/scripts/install.py
-```
-
-The wrapper provides the dashboard with Esc-to-quit support. Box launchers need
-bubblewrap and are Linux only. Existing Codex and AGY boxes sync host rules on
+Box launchers need bubblewrap and are Linux only. Existing Codex and AGY boxes sync host rules on
 their next launch.
-
-`workmux/review.yaml` is a template: replace its agent pane command in a temporary
-overlay with the box you chose, including Codex's update-prompt flag. No account
-or model is selected by the installer.
 
 The installer also links Zed's `settings.json`, `keymap.json` and `tasks.json`.
 Ghostty and IdeaVim stay stored; the installer does not apply them.

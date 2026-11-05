@@ -67,10 +67,31 @@ def install():
             }
             updates.append((destination, current, cleaned))
 
-    for name in ("tmux-tasklog", "workmux-agent-hook", "codex-box-rename-bridge"):
+    for name in (
+        "tmux-tasklog", "workmux-agent-hook", "codex-box-rename-bridge",
+        "workmux", "workmux-dashboard", "workmux-dashboard-grouped",
+    ):
         retired = home / ".local/bin" / name
-        if retired.is_symlink() and retired.resolve() == ROOT / "agents/skills/workmux/scripts" / name:
+        if retired.is_symlink():
             retired.unlink()
+
+    for directory in (
+        ".agents/skills", ".codex/skills", ".claude/skills", ".cursor/skills",
+        ".config/opencode/skills", ".gemini/config/skills", ".config/agents/skills",
+    ):
+        skill_link = home / directory / "workmux"
+        if skill_link.is_symlink():
+            skill_link.unlink()
+    for rel in (".config/workmux/config.yaml", ".config/workmux/review.yaml"):
+        cfg_link = home / rel
+        if cfg_link.is_symlink():
+            cfg_link.unlink()
+    workmux_cfg_dir = home / ".config/workmux"
+    if workmux_cfg_dir.is_dir() and not any(workmux_cfg_dir.iterdir()):
+        try:
+            workmux_cfg_dir.rmdir()
+        except OSError:
+            pass
 
     backup = home / ".local/state/vsvimsettings/backups" / str(time.time_ns())
     for name in ("workmux-status.ts", "session-tracker.js"):
@@ -86,9 +107,6 @@ def install():
         ".zshrc": "shell/.zshrc",
         ".tmux.conf.local": "tmux/.tmux.conf.local",
         ".config/agents/AGENTS.md": "agents/AGENTS.md",
-        ".config/agents/skills/workmux": "agents/skills/workmux",
-        ".config/workmux/config.yaml": "workmux/config.yaml",
-        ".config/workmux/review.yaml": "workmux/review.yaml",
         ".config/zed/settings.json": "zed/settings.json",
         ".config/zed/keymap.json": "zed/keymap.json",
         ".config/zed/tasks.json": "zed/tasks.json",
@@ -100,11 +118,6 @@ def install():
     ):
         paths[target] = "agents/AGENTS.md"
     paths[".cursor/rules/fastapi-string-ids.mdc"] = "cursor/rules/fastapi-string-ids.mdc"
-    for directory in (
-        ".agents/skills", ".codex/skills", ".claude/skills", ".cursor/skills",
-        ".config/opencode/skills", ".gemini/config/skills",
-    ):
-        paths[f"{directory}/workmux"] = "agents/skills/workmux"
     for source in sorted((ROOT / "agents/bin").iterdir()):
         paths[f".local/bin/{source.name}"] = str(source.relative_to(ROOT))
     paths[".local/bin/cursor-box"] = "agents/bin/agent-box"

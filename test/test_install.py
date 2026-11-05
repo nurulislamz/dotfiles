@@ -47,14 +47,11 @@ class RestoreTests(unittest.TestCase):
             nvim = home / ".config/nvim"
             nvim.mkdir(parents=True)
             (nvim / "init.lua").write_text("original config\n")
-            skill = home / ".config/agents/skills/workmux"
-            skill.mkdir(parents=True)
-            (skill / "local.txt").write_text("local skill\n")
             claude = home / ".claude/settings.json"
             claude.parent.mkdir()
             custom = {"type": "command", "command": "custom-check"}
             claude.write_text(json.dumps({"permissions": {"allow": []}, "hooks": {
-                "SessionStart": [{"hooks": [custom, {"command": "workmux register-agent"}]}]
+                "SessionStart": [{"hooks": [custom, {"command": "custom-register"}]}]
             }}))
             agy = home / ".gemini/config/hooks.json"
             agy.parent.mkdir(parents=True)
@@ -69,13 +66,9 @@ class RestoreTests(unittest.TestCase):
             self.assertEqual((home / ".tmux.conf.local").resolve(), ROOT / "tmux/.tmux.conf.local")
             self.assertEqual((home / ".local/bin/sesh-switch").resolve(), ROOT / "tmux/sesh-switch.sh")
             self.assertTrue(os.access(home / ".local/bin/sesh-switch", os.X_OK))
-            self.assertEqual(skill.resolve(), ROOT / "agents/skills/workmux")
-            self.assertEqual((home / ".codex/skills/workmux").resolve(), skill.resolve())
-            self.assertFalse((home / ".local/bin/workmux-agent-hook").exists())
             backups = list((home / ".local/state/vsvimsettings/backups").iterdir())
             self.assertEqual(len(backups), 1)
             self.assertEqual((backups[0] / ".config/nvim/init.lua").read_text(), "original config\n")
-            self.assertEqual((backups[0] / ".config/agents/skills/workmux/local.txt").read_text(), "local skill\n")
             settings = json.loads(claude.read_text())
             self.assertEqual(settings["permissions"], {"allow": []})
             self.assertNotIn("hooks", settings)
@@ -110,7 +103,7 @@ class RestoreTests(unittest.TestCase):
             for name in ("workmux-agent-hook", "codex-box-rename-bridge"):
                 path = home / ".local/bin" / name
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.symlink_to(ROOT / "agents/skills/workmux/scripts" / name)
+                path.symlink_to(ROOT / "agents/bin/agent-box")
             result = self.run_install(home)
             self.assertEqual(result.returncode, 0, result.stderr)
             for rel in paths:
@@ -129,7 +122,7 @@ class RestoreTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(len(list((home / ".local/state/vsvimsettings/backups").iterdir())), 1)
 
-    def test_fresh_home_links_zed_and_workmux(self):
+    def test_fresh_home_links_zed(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             self.seed_oh_my_tmux(home)
@@ -137,8 +130,6 @@ class RestoreTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             for name in ("settings.json", "keymap.json", "tasks.json"):
                 self.assertEqual((home / ".config/zed" / name).resolve(), ROOT / "zed" / name)
-            self.assertEqual((home / ".config/workmux/config.yaml").resolve(), ROOT / "workmux/config.yaml")
-            self.assertEqual((home / ".config/workmux/review.yaml").resolve(), ROOT / "workmux/review.yaml")
             self.assertFalse((home / ".codex/hooks.json").exists())
             self.assertFalse((home / ".gemini/config/hooks.json").exists())
 
@@ -164,7 +155,6 @@ class RestoreTests(unittest.TestCase):
             for name in ("settings.json", "keymap.json", "tasks.json"):
                 self.assertFalse((ROOT / "zed" / name).is_symlink())
                 self.assertEqual((home / ".config/zed" / name).resolve(), ROOT / "zed" / name)
-            self.assertEqual((home / ".claude/AGENTS.md").resolve(), ROOT / "agents/AGENTS.md")
             self.assertEqual((home / ".claude/CLAUDE.md").resolve(), ROOT / "agents/AGENTS.md")
 
     def test_installed_sesh_switch_connects_selected_session(self):

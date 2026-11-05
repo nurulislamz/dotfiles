@@ -2,8 +2,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .worktrees/
-.workmux/
 .nvimlog
 *.swp
 *.swo
-agents/skills/workmux/scripts/*.tar.gz

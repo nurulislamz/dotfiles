@@ -84,7 +84,6 @@ link_omp() {
 }
 link_omp "$ROOT/agents/AGENTS.md" .omp/AGENTS.md
 link_omp "$ROOT/agents/AGENTS.md" .config/omp/AGENTS.md
-link_omp "$ROOT/agents/skills/workmux" .omp/agent/skills/workmux
 
 # Inventory from the source machine, including spare/test profiles.
 AGY_BOXES=(chaos missing mohammed nurulz physics worker1)
@@ -107,4 +106,3 @@ echo "Agent setup complete. Existing profiles and CLI versions retained."
 echo "Login per box: agy-box <name>, codex-box <name> login, agent-box <name> login."
 echo "Start omp, then /login. Keep ~/.local/bin on PATH."
 echo "AGY skips permission prompts; Cursor enables trust/auto-review/MCP approval."
-echo "Native workmux and its custom Session build remain separate; see dotfiles.md."

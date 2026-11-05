@@ -64,11 +64,9 @@ runs `test/live/clip_test.sh` (WezTerm keys + Chrome keyboard test).
 
 ## Task logging removed
 
-Session task files, the `tmux-tasklog` helper, the tmux session-creation hook,
-and the Workmux `post_create` task hook are retired. Prefix+t and Prefix+.
+Session task files, the `tmux-tasklog` helper, and the tmux session-creation hook
+are retired. Prefix+t and Prefix+.
 are unbound. The shell no longer exports `TASK_FILE`, and the shared agent
 rules no longer require task-file tracking. Existing task notes remain on disk.
 Agent hooks are removed. The installer clears host and box hook configs, and
 tmux-assistant-resurrect cannot install Claude, Cursor or OpenCode hooks.
-Automatic Workmux status updates are disabled. Agents name their tmux window
-once at session startup through `agents/AGENTS.md`.

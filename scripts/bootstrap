@@ -36,5 +36,4 @@ fi
 
 echo "Bootstrap done from $ROOT"
 echo "Authenticate agent CLIs yourself. This repo does not copy credentials."
-echo "Install native workmux at ~/.local/libexec/workmux before using the wrapper."
 echo "Box launchers need bubblewrap (Linux only)."

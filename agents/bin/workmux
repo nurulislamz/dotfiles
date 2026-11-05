@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-if [[ "${1:-}" == dashboard && -t 0 && -t 1 ]]; then
-  shift
-  exec "$HOME/.local/bin/workmux-dashboard" "$@"
-fi
-exec "$HOME/.local/libexec/workmux" "$@"

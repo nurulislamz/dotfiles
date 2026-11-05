@@ -132,11 +132,6 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
 
-# Workmux: official installation recommendations.
-alias wm='workmux'
-if command -v workmux >/dev/null 2>&1; then
-  eval "$(workmux completions zsh)"
-fi
 
 # Bare `tmux` attaches the last session; create only when none exist.
 tmux() {

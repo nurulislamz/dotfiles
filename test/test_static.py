@@ -88,31 +88,16 @@ class StaticTests(unittest.TestCase):
         self.assertIn("scrollback", text)
         self.assertRegex(text, r"lines\s*=\s*10000")
 
-    def test_workmux_yaml(self):
+    def test_tmux_which_key_yaml(self):
         try:
             import yaml
         except ImportError:
             yaml = None
-        for rel, keys in (
-            ("workmux/config.yaml", ("worktree_dir", "mode", "sidebar")),
-            ("workmux/review.yaml", ("mode", "windows")),
-            ("tmux/config.yaml", ()),
-        ):
-            text = _read(rel)
-            self.assertTrue(text.strip(), rel)
-            if yaml is not None:
-                data = yaml.safe_load(text)
-                self.assertIsInstance(data, dict, rel)
-                for key in keys:
-                    self.assertIn(key, data, f"{rel} missing {key}")
+        text = _read("tmux/config.yaml")
+        self.assertTrue(text.strip())
         if yaml is not None:
-            config = yaml.safe_load(_read("workmux/config.yaml"))
-            self.assertEqual(config["mode"], "session")
-            self.assertEqual(config["worktree_dir"], ".worktrees")
-            self.assertEqual(config["sidebar"]["group_by"], "session")
-            review = yaml.safe_load(_read("workmux/review.yaml"))
-            names = [w.get("name") for w in review.get("windows", [])]
-            self.assertEqual(names, ["nvim", "codex"])
+            data = yaml.safe_load(text)
+            self.assertIsInstance(data, dict)
 
     def test_wezterm_static_keys(self):
         text = _read("wezterm/wezterm.lua")

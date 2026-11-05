@@ -709,13 +709,6 @@ set-hook -gu after-new-session
 unbind-key t #!important
 unbind-key . #!important
 
-# Workmux agent dashboard and sidebar
-unbind-key A
-unbind-key g
-bind-key -N 'Workmux dashboard' a display-popup -w 90% -h 85% -d '#{pane_current_path}' -E '$HOME/.local/bin/workmux dashboard'
-bind-key -N 'Toggle workmux sidebar' S run-shell -b -c '#{pane_current_path}' 'TMUX_PANE=#{pane_id} $HOME/.local/bin/workmux sidebar'
-# shortcut: workmux still advertises t, remove this guard when it supports unbinding.
-bind-key -T root t if-shell -F '#{!=:#{@workmux_role},sidebar}' 'send-keys t'
 
 # Catppuccin mocha window tabs: blue index + mauve name. #!important so
 # oh-my-tmux and agent theme reloads cannot replace them.

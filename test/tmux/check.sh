@@ -43,43 +43,16 @@ case "$prefix2" in
 esac
 
 python3 - "$SOCK" <<'PYTEST'
-import os, pty, subprocess, sys, time
+import subprocess, sys
 
 def tm(*args):
     return subprocess.check_output(["tmux", "-L", sys.argv[1], *args], text=True).strip()
 
-pane = tm("new-window", "-P", "-F", "#{pane_id}", "cat")
-master, slave = pty.openpty()
-env = {k: v for k, v in os.environ.items() if k not in ("TMUX", "TMUX_PANE")}
-env["TERM"] = "xterm-256color"
-client = subprocess.Popen(["tmux", "-L", sys.argv[1], "attach-session"],
-                          stdin=slave, stdout=slave, stderr=slave, env=env)
-try:
-    for _ in range(50):
-        target = tm("list-clients", "-F", "#{client_tty}")
-        if target:
-            break
-        time.sleep(0.1)
-    assert target, "test client did not attach"
-    tm("select-pane", "-t", pane)
-    tm("set-option", "-p", "-t", pane, "@workmux_role", "sidebar")
-    tm("send-keys", "-K", "-c", target, "t")
-    time.sleep(0.2)
-    assert not tm("capture-pane", "-p", "-t", pane), "sidebar received t"
-    tm("set-option", "-pu", "-t", pane, "@workmux_role")
-    tm("send-keys", "-K", "-c", target, "t")
-    time.sleep(0.2)
-    assert tm("capture-pane", "-p", "-t", pane) == "t", "normal typing lost t"
-    for key in ("t", "."):
-        result = subprocess.run(["tmux", "-L", sys.argv[1], "list-keys", "-T", "prefix", key], capture_output=True)
-        assert result.returncode != 0, f"retired task shortcut still bound: {key}"
-    assert "tmux-tasklog" not in tm("show-hooks", "-g")
-    print("ok: sidebar guard and normal typing preserved; task shortcuts and hooks absent")
-finally:
-    client.terminate()
-    client.wait(timeout=5)
-    os.close(slave)
-    os.close(master)
+for key in ("t", "."):
+    result = subprocess.run(["tmux", "-L", sys.argv[1], "list-keys", "-T", "prefix", key], capture_output=True)
+    assert result.returncode != 0, f"retired task shortcut still bound: {key}"
+assert "tmux-tasklog" not in tm("show-hooks", "-g")
+print("ok: retired task shortcuts and hooks absent")
 PYTEST
 
 local_conf="$HOME/.tmux.conf.local"

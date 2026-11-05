@@ -77,28 +77,12 @@ not restored by this repo. Optional nvm, Go and OpenClaw setup is also separate.
 
 ## 4. Preserve real CLI binaries before linking wrappers
 
-Install native workmux first, then copy its actual executable before the
-installer puts this repo's wrapper at `~/.local/bin/workmux`:
-
-```sh
-mkdir -p ~/.local/libexec
-cp "$(command -v workmux)" ~/.local/libexec/workmux
-chmod +x ~/.local/libexec/workmux
-```
-
-Only use that copy command before installing the wrapper. On an existing
-machine, inspect `command -v workmux` and its symlink target first; never copy
-the wrapper over the native binary. The current dashboard config uses the
-custom `session` column. The matching native workmux build is not contained in
-this repo; obtain that build or explicitly adjust the column list for a stock
-binary. Box launchers additionally need bubblewrap on Linux.
-
 If using Antigravity, install its real CLI first and preserve its executable
 as `~/.local/bin/agy-real`, or set `AGY_REAL_BIN` to its real path. The installer
 replaces `~/.local/bin/agy` with a wrapper. That wrapper and the shell aliases
 default to `--dangerously-skip-permissions`; use only with that behavior intended.
 Use the agent setup script below to install missing agent CLIs and recreate profiles.
-Authentication remains separate.
+Authentication remains separate. Box launchers additionally need bubblewrap on Linux.
 
 ## Agent tools and saved box inventory
 
@@ -113,8 +97,7 @@ The script installs missing Antigravity, Codex, Oh My Pi (`omp`) and Cursor Agen
 CLIs, preserves the real AGY executable before linking its wrapper, then runs
 `scripts/install.py`. This restores all dotfiles links, including shell
 and editor configuration. Existing replacements use the installer's backups.
-It also links shared rules at `~/.omp/AGENTS.md` and `~/.config/omp/AGENTS.md`,
-and the workmux skill at `~/.omp/agent/skills/workmux`; replaced OMP paths are
+It also links shared rules at `~/.omp/AGENTS.md` and `~/.config/omp/AGENTS.md`; replaced OMP paths are
 backed up under `~/.local/state/vsvimsettings/backups/agents-<timestamp>-<pid>/`.
 
 Profile names captured on 2026-10-17 (including spare/test profiles):
@@ -144,15 +127,13 @@ Repeat for the other boxes you use; complete OMP's provider login inside OMP.
 Keep `~/.local/bin` on PATH. If using a custom `AGY_REAL_BIN`, export that same
 path in future shells too. The standard preserved path is `~/.local/bin/agy-real`.
 
-Tracked: launcher code, named-profile inventory, shared instructions, workmux
-skill and workmux configuration. Not transferred: credentials,
+Tracked: launcher code, named-profile inventory and shared instructions. Not transferred: credentials,
 API keys, sessions/history, machine trust, private MCP configuration, extra
 locally installed skills/extensions, or per-account model/provider settings.
 OMP's local databases and `~/.omp/agent/config.yml` stay outside Git.
 The script uses the existing AGY permission bypass and Cursor trust/auto-review/
 MCP-approval defaults; these boxes share the host home directory and are account
-separation, not isolation from your files. Native workmux (including the custom
-Session-column build) is still a separate prerequisite for dashboard use.
+separation, not isolation from your files.
 
 Install sources: [Antigravity](https://github.com/google-antigravity/antigravity-cli),
 [Codex](https://github.com/openai/codex),
@@ -187,8 +168,8 @@ Neovim plugins, tmux plugins and WezTerm plugins. WezTerm loads resurrect,
 modal, replay and cmdpicker on startup; `wezterm/wezterm.sh` supplies shell
 semantic zones for replay.
 
-Links cover Neovim, WezTerm, zsh, tmux, workmux, Zed, shared agent rules,
-the workmux skill and helper commands. Agent hooks are removed from host and
+Links cover Neovim, WezTerm, zsh, tmux, Zed, shared agent rules
+and helper commands. Agent hooks are removed from host and
 box configs while other settings are preserved. Replaced configs are backed up under
 `~/.local/state/vsvimsettings/backups/<timestamp>/`. Rerunning preserves
 correct links and settings. Ghostty and IdeaVim configs remain stored
@@ -203,7 +184,7 @@ the optional Command Code file is `~/.secrets/commandcode.env`.
 The shell's `open` alias expects `~/.local/bin/open`, which this repo does not
 provide. Restore that local helper or explicitly adjust the alias on the new
 machine. Authentication and machine trust are not transferred. Agent hooks stay
-disabled. Agents name their tmux window once at session startup through `AGENTS.md`.
+disabled.
 
 ## 6. Verify on the target machine
 
@@ -214,7 +195,7 @@ Run only when requested by the user; this command executes test checks:
 ```
 
 Manually open zsh, Neovim, tmux and WezTerm. Check fonts, clipboard, language
-servers, workmux dashboard and shell suggestions. WezTerm and tmux both use
+servers and shell suggestions. WezTerm and tmux both use
 Ctrl+A as a prefix/leader; check nested key handling on the target machine.
 `scripts/sandbox-linux.sh` is an optional empty-home smoke check;
 `scripts/regression-check.sh` targets the original WSL host, not a fresh machine.

@@ -68,16 +68,6 @@ if command -v foot >/dev/null 2>&1; then
 else
   echo "warn: missing foot"
 fi
-if [ -x "$HOME/.local/libexec/workmux" ]; then
-  ok "native workmux"
-else
-  echo "warn: missing ~/.local/libexec/workmux"
-fi
-
-if [ -d "$ROOT/agents/skills/workmux/scripts" ]; then
-  section "WORKMUX UNITS"
-  run python3 -m unittest discover -s "$ROOT/agents/skills/workmux/scripts" -p 'test_*.py' -q || true
-fi
 
 if is_wsl_live; then
   section "WSL LIVE"
