@@ -38,7 +38,7 @@ config.force_reverse_video_cursor = true
 -- Window Configuration
 config.initial_rows = 45
 config.initial_cols = 180
-config.window_decorations = "RESIZE"
+config.window_decorations = "TITLE | RESIZE"
 config.window_background_opacity = opacity
 config.window_background_image = (os.getenv("WEZTERM_CONFIG_FILE") or ""):gsub("wezterm.lua", "bg-blurred.png")
 config.window_close_confirmation = "NeverPrompt"
