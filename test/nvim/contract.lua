@@ -47,7 +47,7 @@ local function run()
         check("enabled lockfile plugins installed", #missing == 0, table.concat(missing, ", "))
     end
 
-    for _, mod in ipairs({ "snacks", "oil", "glance", "fff", "hlslens", "gitsigns" }) do
+    for _, mod in ipairs({ "snacks", "neo-tree", "glance", "fff", "hlslens", "gitsigns" }) do
         local loaded, err = pcall(require, mod)
         check("require " .. mod, loaded, err)
     end
@@ -56,7 +56,7 @@ local function run()
     check("colorscheme cyberdream", vim.g.colors_name == "cyberdream")
     check("<leader>ff", has_map("n", "<leader>ff"))
     check("<leader>e", has_map("n", "<leader>e"))
-    check("- oil", has_map("n", "-"))
+    check("- neo-tree reveal", has_map("n", "-"))
     check("gd", has_map("n", "gd"))
     check("gr", has_map("n", "gr"))
     check("<C-h>", has_map("n", "<C-h>"))
@@ -75,8 +75,8 @@ local function run()
     end
     check("fff select_tab has <S-CR>", fff_has_s_cr)
 
-    local oil_keys = require("oil.config").keymaps["<S-CR>"]
-    check("oil <S-CR> tab", oil_keys ~= nil and oil_keys.opts ~= nil and oil_keys.opts.tab == true)
+    local tree_keys = require("neo-tree").config.window.mappings
+    check("neo-tree <C-CR> tab", tree_keys["<C-CR>"] == "open_tabnew")
 
     local fzf_root = vim.fn.stdpath("data") .. "/lazy/telescope-fzf-native.nvim/build/"
     check(

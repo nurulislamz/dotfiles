@@ -51,16 +51,8 @@ end, { desc = "Save and reload Neovim config" })
 do
     local snacks = require("snacks")
 
-    map("n", "<leader>e", function()
-        local explorer = snacks.picker.get({ source = "explorer" })[1]
-        if explorer then
-            explorer:close()
-        else
-            snacks.explorer()
-        end
-    end, { desc = "Toggle File Explorer (Snacks)" })
-
-    map("n", "-", "<cmd>Oil<cr>", { desc = "Open parent directory (Oil)" })
+    map("n", "<leader>e", "<cmd>Neotree toggle reveal<cr>", { desc = "Toggle File Explorer" })
+    map("n", "-", "<cmd>Neotree reveal<cr>", { desc = "Reveal current file in explorer" })
 
     -- Custom Unified Window/Buffer Management (Tmux Synergy)
     map("n", '<leader>"', "<cmd>split<CR>", { desc = "Split horizontal" })
@@ -483,7 +475,7 @@ do
         for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
             local buf = vim.api.nvim_win_get_buf(win)
             local ft = vim.bo[buf].filetype
-            if ft ~= "codediff-explorer" and ft ~= "oil" and not ft:find("^snacks_") then
+            if ft ~= "codediff-explorer" and ft ~= "neo-tree" and not ft:find("^snacks_") then
                 vim.wo[win].scrollbind = new_val
             end
         end

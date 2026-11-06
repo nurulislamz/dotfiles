@@ -1,4 +1,4 @@
--- Disable netrw for oil.nvim
+-- Disable netrw for neo-tree
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 

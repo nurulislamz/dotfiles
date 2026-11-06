@@ -67,7 +67,7 @@ return {
         { "<leader>3", hidden = true },
         { "<leader>4", hidden = true },
         { "<leader>p", desc = "Search paste buffer" },
-        { "<leader>e", desc = "File explorer (Snacks)" },
+        { "<leader>e", desc = "File explorer" },
         { "<leader>.", desc = "Scratch buffer" },
       },
     },

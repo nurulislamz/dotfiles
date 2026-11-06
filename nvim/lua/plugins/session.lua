@@ -144,15 +144,7 @@ return {
         pattern = "PersistenceSavePre",
         callback = function()
           drop_tasklogs()
-          pcall(function()
-            local snacks = package.loaded["snacks"]
-            if snacks and snacks.picker then
-              local explorer = snacks.picker.get({ source = "explorer" })[1]
-              if explorer then
-                explorer:close()
-              end
-            end
-          end)
+          pcall(vim.cmd, "Neotree close")
           -- project.nvim may have cd'd away; pin the save to the launch dir so
           -- the session keeps the name it was loaded from.
           pcall(vim.cmd.cd, vim.fn.fnameescape(start_dir))
