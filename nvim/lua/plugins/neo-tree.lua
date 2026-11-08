@@ -22,6 +22,7 @@ return {
         mappings = {
           ["I"] = "toggle_hidden",
           ["<C-k>"] = "navigate_up",
+          ["<S-CR>"] = "set_root",
         },
       },
     },
